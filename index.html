@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KASIA Ungasan · Quarterly Report</title>
+<meta name="description" content="KASIA Ungasan operating report — quarterly performance, channels, costs." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div class="frame">
+
+  <div class="ruler" data-label="A / QUARTERLY · 2026 · Q1"></div>
+
+  <header class="masthead">
+    <div>
+      <h1 class="wordmark">KASIA <em>Ungasan</em></h1>
+      <p class="subtitle">Operating Report · Partner View</p>
+    </div>
+    <div class="masthead-right">
+      Quarter One<br/>
+      <strong id="period-label">Jan – Mar 2026</strong><br/>
+      <span class="status" id="source-status">loading</span>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="active">Quarterly</a>
+    <a href="monthly.html">Monthly</a>
+    <a href="historical.html">History</a>
+  </nav>
+
+  <!-- HERO STAT -->
+  <div class="hero-stat">
+    <div>
+      <h2 class="main-num" id="hero-opprofit">—</h2>
+      <div class="main-label">Operating profit · Q1 2026</div>
+      <div class="main-sub" id="hero-sub">Revenue less operating costs, before investor distributions and reinvestment.</div>
+    </div>
+    <aside>
+      <div>Revenue <b id="hero-rev">—</b></div>
+      <div>Op. cost <b id="hero-opex">—</b></div>
+      <div>Op. margin <b id="hero-margin">—</b></div>
+    </aside>
+  </div>
+
+  <!-- HEADLINES -->
+  <section id="headlines">
+    <div class="section-no">§01 · Headline</div>
+    <h3 class="section-title">The hotel is operationally profitable.</h3>
+    <p class="lede" id="headline-lede">—</p>
+    <div class="cols-3" style="margin-top:24px">
+      <div class="callout">
+        <strong>What changed this quarter.</strong>
+        Investor distributions landed in February (<span id="feb-payout">—</span>). Stripping those out, the underlying hotel operation cleared <span class="num pos" id="underlying-profit">—</span> on the quarter.
+      </div>
+      <div class="callout">
+        <strong>Where the volume came from.</strong>
+        Direct bookings (transfer) delivered <span id="direct-share">—</span> of room revenue. Airbnb held its share. Agoda was just switched on in February.
+      </div>
+      <div class="callout">
+        <strong>What we don't see yet.</strong>
+        Occupancy, ADR and RevPAR need a booking-system export. The KPI block is flagged <em>coming soon</em> until the PMS feed is wired.
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI -->
+  <section id="kpi">
+    <div class="section-no">§02 · Key Indicators</div>
+    <h3 class="section-title">Financial pulse</h3>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Hotel Revenue</div>
+        <div class="kpi-value" id="kpi-rev">—</div>
+        <div class="kpi-sub" id="kpi-rev-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Operating Profit</div>
+        <div class="kpi-value" id="kpi-opprofit">—</div>
+        <div class="kpi-sub" id="kpi-opprofit-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Operating Margin</div>
+        <div class="kpi-value" id="kpi-margin">—</div>
+        <div class="kpi-sub">Revenue − opex</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cash Balance Δ</div>
+        <div class="kpi-value" id="kpi-balance">—</div>
+        <div class="kpi-sub" id="kpi-balance-sub">After distributions &amp; credit</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="margin-top:1px">
+      <div class="kpi">
+        <div class="kpi-label">Occupancy</div>
+        <div class="kpi-value muted">—</div>
+        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">ADR</div>
+        <div class="kpi-value muted">—</div>
+        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">RevPAR</div>
+        <div class="kpi-value muted">—</div>
+        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Nights Sold</div>
+        <div class="kpi-value muted">—</div>
+        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONTHLY BARS -->
+  <section id="monthly">
+    <div class="section-no">§03 · Monthly Arc</div>
+    <h3 class="section-title">Revenue &amp; operating cost, month by month</h3>
+    <p class="section-lede">Each bar pair: revenue (solid jungle) vs. operating cost (hatched). Investor payouts are excluded from cost here so operating performance is visible.</p>
+    <div class="panel">
+      <div class="panel-label"><span>§03.1 — MONTHLY BARS</span><span class="note">IDR</span></div>
+      <div id="month-chart"></div>
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section id="channels">
+    <div class="section-no">§04 · Channels</div>
+    <h3 class="section-title">Where the bookings came from</h3>
+    <p class="section-lede">Direct (bank transfer) continues to dominate. Agoda was activated in February and will compound across Q2.</p>
+    <div class="cols-2-2">
+      <div class="panel">
+        <div class="panel-label"><span>§04.1 — CHANNEL MIX</span><span class="note">% of room revenue</span></div>
+        <div class="bars" id="channel-bars"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-label"><span>§04.2 — NOTES</span></div>
+        <div style="font-size:14px;line-height:1.6">
+          <p><strong>Direct (transfer).</strong> Repeat guests, referrals, website, WhatsApp. Highest-margin channel.</p>
+          <p><strong>Airbnb.</strong> Steady. No new listing work required this quarter.</p>
+          <p><strong>Agoda.</strong> Just set up in February. Intentional test; Q2 will show whether it adds volume or substitutes direct.</p>
+          <p><strong>Commission retained.</strong> Roughly <span id="direct-retained">—</span> stayed with KASIA by keeping bookings direct at a blended 18–22% OTA commission rate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COSTS -->
+  <section id="costs">
+    <div class="section-no">§05 · Cost Structure</div>
+    <h3 class="section-title">What it costs to run the building</h3>
+    <p class="section-lede">Labor and the credit line carry most of the load. A few one-off items (legal in January, asset purchases) inflated specific months but do not recur at the same scale.</p>
+    <div class="panel">
+      <div class="panel-label"><span>§05.1 — OPERATING COSTS · Q1 2026</span><span class="note">IDR, ranked</span></div>
+      <table class="tbl" id="costs-tbl">
+        <thead><tr><th>Line</th><th>Note</th><th class="num">Q1 total</th><th class="num">% of opex</th></tr></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- CAFE -->
+  <section id="cafe">
+    <div class="section-no">§06 · Cafe</div>
+    <h3 class="section-title">The second revenue line</h3>
+    <p class="section-lede">Cafe operates near breakeven this quarter — priced for neighborhood, not margin. It's a guest amenity and a community anchor. The net signal matters less than whether it pulls traffic into the building.</p>
+    <div class="panel">
+      <div class="panel-label"><span>§06.1 — CAFE P&amp;L · Q1 2026</span></div>
+      <div class="cols-3">
+        <div>
+          <div class="kpi-label">Revenue</div>
+          <div class="kpi-value" id="cafe-rev">—</div>
+        </div>
+        <div>
+          <div class="kpi-label">Direct Cost</div>
+          <div class="kpi-value" id="cafe-cost">—</div>
+        </div>
+        <div>
+          <div class="kpi-label">Net</div>
+          <div class="kpi-value" id="cafe-net">—</div>
+          <div class="kpi-sub" id="cafe-margin">—</div>
+        </div>
+      </div>
+      <div class="footnote" style="margin-top:18px">
+        <b>Footnote.</b> Photo studio revenue for Q1 was <span id="studio-rev-inline">—</span> across the quarter. Reported for completeness; not a strategic line at current volume.
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISIONS -->
+  <section id="decisions">
+    <div class="section-no">§07 · For the Partners</div>
+    <h3 class="section-title">Decisions on the table</h3>
+    <div class="cols-2">
+      <div class="panel">
+        <div class="panel-label"><span>§07.1 — YES</span><span class="note">ship / continue</span></div>
+        <ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:1.7">
+          <li>— Keep pushing direct bookings. Every Rp 100 M through transfer is ~Rp 20 M kept.</li>
+          <li>— Hold Agoda at current listing through Q2 as a data collection exercise.</li>
+          <li>— Wire the PMS export into the dashboard (occupancy / ADR / RevPAR).</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-label"><span>§07.2 — DECIDE</span><span class="note">next partner call</span></div>
+        <ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:1.7">
+          <li>— Cadence of investor distributions (one lump vs. quarterly).</li>
+          <li>— Reinvestment envelope for 2026 (what moved the needle in 2024–25 vs. what didn't).</li>
+          <li>— Cafe positioning: amenity vs. standalone P&amp;L target.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>KASIA UNGASAN · PARTNER REPORT · 2026 Q1</div>
+    <div>Data <span id="data-source">—</span> · Generated <span id="gen-time">—</span></div>
+  </footer>
+
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+(async function() {
+  const { data, source } = await loadYear(2026);
+  const q1 = { months: data.months.slice(0, 3) };
+  const m = computeMetrics(q1);
+
+  // Source status
+  const srcEl = document.getElementById('source-status');
+  srcEl.textContent = source === 'live' ? 'Live · Google Sheets' : 'Static · embedded';
+  srcEl.className = 'status ' + (source === 'live' ? 'live' : 'static');
+  document.getElementById('data-source').textContent = source === 'live' ? 'live from Google Sheets' : 'embedded snapshot';
+  document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
+
+  // Hero
+  document.getElementById('hero-opprofit').textContent = fmtIDR(m.op_profit);
+  document.getElementById('hero-rev').textContent  = fmtIDR(m.revenue);
+  document.getElementById('hero-opex').textContent = fmtIDR(m.opex);
+  document.getElementById('hero-margin').textContent = fmtPct(m.op_margin);
+
+  // Headline lede
+  const febPayout = q1.months[1].investor_payout;
+  document.getElementById('feb-payout').textContent = fmtIDR(febPayout);
+  document.getElementById('underlying-profit').textContent = fmtIDR(m.op_profit);
+  const directShare = m.channels.transfer / m.chan_total;
+  document.getElementById('direct-share').textContent = fmtPct(directShare);
+
+  const lede = `Q1 cleared ${esc(fmtIDR(m.op_profit))} in operating profit on ${esc(fmtIDR(m.revenue))} of room revenue — a ${esc(fmtPct(m.op_margin))} margin. The reported cash balance looks negative because ${esc(fmtIDR(febPayout))} of investor distributions were paid out in February. Strip those and the building paid for itself this quarter.`;
+  document.getElementById('headline-lede').innerHTML = lede;
+
+  // KPIs
+  document.getElementById('kpi-rev').textContent = fmtIDR(m.revenue);
+  document.getElementById('kpi-rev-sub').textContent = 'Rooms only · cafe tracked separately';
+  document.getElementById('kpi-opprofit').textContent = fmtIDR(m.op_profit);
+  const opprofitSub = document.getElementById('kpi-opprofit-sub');
+  opprofitSub.textContent = 'Pre-distribution, pre-credit';
+  opprofitSub.classList.add(m.op_profit >= 0 ? 'pos' : 'neg');
+  document.getElementById('kpi-margin').textContent = fmtPct(m.op_margin);
+
+  const balance = m.revenue - m.expense_total;
+  document.getElementById('kpi-balance').textContent = fmtIDR(balance);
+  const balSub = document.getElementById('kpi-balance-sub');
+  balSub.textContent = (balance >= 0 ? 'Net of distributions' : 'After ' + fmtIDR(febPayout) + ' payout');
+  balSub.classList.add(balance >= 0 ? 'pos' : 'neg');
+
+  // Direct retained estimate (20% blended commission)
+  const directRetained = m.channels.transfer * 0.20;
+  document.getElementById('direct-retained').textContent = fmtIDR(directRetained);
+
+  renderMonthlyChart(m);
+  renderChannels(m);
+  renderCosts(m);
+
+  document.getElementById('cafe-rev').textContent = fmtIDR(m.cafe_rev);
+  document.getElementById('cafe-cost').textContent = fmtIDR(m.cafe_opex);
+  document.getElementById('cafe-net').textContent  = fmtIDR(m.cafe_net);
+  const cafeMargin = m.cafe_net / (m.cafe_rev || 1);
+  const cafeMEl = document.getElementById('cafe-margin');
+  cafeMEl.textContent = fmtPct(cafeMargin) + ' margin';
+  cafeMEl.classList.add(cafeMargin >= 0 ? 'pos' : 'neg');
+  document.getElementById('studio-rev-inline').textContent = fmtIDR(m.studio_rev);
+})();
+
+function renderMonthlyChart(m) {
+  const W = 1000, H = 320, PAD_L = 64, PAD_R = 18, PAD_T = 22, PAD_B = 48;
+  const plotW = W - PAD_L - PAD_R;
+  const plotH = H - PAD_T - PAD_B;
+  const months = m.months;
+  const vals = months.flatMap(mo => [mo.hotel_revenue, (mo.hotel_expense_total - (mo.investor_payout||0) - (mo.investment||0))]);
+  const maxV = Math.max(...vals) * 1.1;
+  const yScale = v => PAD_T + plotH - (v / maxV) * plotH;
+  const groupW = plotW / months.length;
+  const barW = Math.min(42, groupW * 0.34);
+
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map(t => t * maxV);
+  const gridLines = ticks.map(v => `<line class="grid" x1="${PAD_L}" x2="${W-PAD_R}" y1="${yScale(v)}" y2="${yScale(v)}"/>
+    <text x="${PAD_L - 10}" y="${yScale(v)+3}" text-anchor="end">${esc(fmtIDR(v))}</text>`).join('');
+
+  const bars = months.map((mo, i) => {
+    const cx = PAD_L + groupW * i + groupW / 2;
+    const opex = mo.hotel_expense_total - (mo.investor_payout||0) - (mo.investment||0);
+    const rev = mo.hotel_revenue;
+    const revY = yScale(rev), opexY = yScale(opex);
+    return `
+      <g>
+        <rect class="series-pos" x="${cx - barW - 2}" y="${revY}" width="${barW}" height="${plotH + PAD_T - revY}"/>
+        <rect fill="url(#hatch)" stroke="var(--ink)" stroke-width="0.6" x="${cx + 2}" y="${opexY}" width="${barW}" height="${plotH + PAD_T - opexY}"/>
+        <text x="${cx}" y="${H - PAD_B + 18}" text-anchor="middle" fill="var(--ink)" font-weight="500">${esc(mo.month)}</text>
+        <text x="${cx - barW/2 - 2}" y="${revY - 6}" text-anchor="middle" font-size="9">${esc(fmtIDR(rev))}</text>
+        <text x="${cx + barW/2 + 2}" y="${opexY - 6}" text-anchor="middle" font-size="9" fill="var(--ink-soft)">${esc(fmtIDR(opex))}</text>
+      </g>`;
+  }).join('');
+
+  document.getElementById('month-chart').innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly revenue versus operating cost, Q1 2026" style="width:100%;height:auto;display:block">
+      <defs>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="6" height="6" fill="var(--concrete-1)"/>
+          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--ink-mute)" stroke-width="1.2"/>
+        </pattern>
+      </defs>
+      ${gridLines}
+      <line class="axis" x1="${PAD_L}" x2="${W-PAD_R}" y1="${PAD_T + plotH}" y2="${PAD_T + plotH}"/>
+      <line class="axis" x1="${PAD_L}" x2="${PAD_L}" y1="${PAD_T}" y2="${PAD_T + plotH}"/>
+      ${bars}
+      <g transform="translate(${PAD_L}, ${H - 6})">
+        <rect class="series-pos" x="0" y="-10" width="12" height="10"/>
+        <text x="18" y="-1">Revenue</text>
+        <rect fill="url(#hatch)" stroke="var(--ink)" stroke-width="0.5" x="100" y="-10" width="12" height="10"/>
+        <text x="118" y="-1">Operating cost (ex. distributions)</text>
+      </g>
+    </svg>`;
+}
+
+function renderChannels(m) {
+  const entries = [
+    ["Direct (transfer)", m.channels.transfer, 'fill'],
+    ["Airbnb",            m.channels.airbnb,   'fill'],
+    ["Agoda",             m.channels.agoda,    'fill alt'],
+    ["EDC (card)",        m.channels.edc,      'fill alt'],
+    ["Cash",              m.channels.cash,     'fill alt'],
+  ];
+  const total = m.chan_total;
+  const maxV = Math.max(...entries.map(e => e[1]), 1);
+  const html = entries.map(([label, v, cls]) => {
+    const pct = v / (total || 1);
+    return `<div class="bar-row">
+      <div class="label">${esc(label)}</div>
+      <div class="track"><div class="${esc(cls)}" style="width:${(v/maxV*100).toFixed(1)}%"></div></div>
+      <div class="val">${esc(fmtIDR(v))} · ${esc(fmtPct(pct))}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('channel-bars').innerHTML = html;
+}
+
+function renderCosts(m) {
+  const entries = Object.entries(m.costs)
+    .map(([name, {v, note}]) => ({ name, v, note }))
+    .filter(e => e.v > 0)
+    .sort((a,b) => b.v - a.v);
+  const total = entries.reduce((a,e) => a + e.v, 0);
+  const tbody = entries.map(e => `
+    <tr>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td class="muted">${esc(e.note)}</td>
+      <td class="num">${esc(fmtIDR(e.v))}</td>
+      <td class="num muted">${esc(fmtPct(e.v/(total||1)))}</td>
+    </tr>`).join('');
+  document.querySelector('#costs-tbl tbody').innerHTML = tbody;
+  document.querySelector('#costs-tbl tfoot').innerHTML = `
+    <tr class="total"><td>Total</td><td></td><td class="num">${esc(fmtIDR(total))}</td><td class="num">100%</td></tr>`;
+}
+</script>
+</body>
+</html>

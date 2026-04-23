@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KASIA Ungasan · Monthly Report</title>
+<meta name="description" content="KASIA Ungasan — single-month snapshot. Revenue, channels, costs, balance." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+  .month-picker {
+    display: flex;
+    gap: 1px;
+    background: var(--stroke-strong);
+    border: 1px solid var(--stroke-strong);
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .month-picker button {
+    flex: 1;
+    min-width: 80px;
+    background: var(--paper);
+    border: 0;
+    padding: 10px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .month-picker button:hover { color: var(--ink); background: var(--concrete-1); }
+  .month-picker button.active {
+    background: var(--jungle);
+    color: var(--concrete-0);
+    font-weight: 600;
+  }
+  .month-picker button:disabled {
+    color: var(--ink-mute);
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+    margin: 24px 0;
+  }
+  .flow-box {
+    padding: 20px 22px;
+    border: 1px solid var(--stroke-strong);
+    background: var(--paper);
+    text-align: center;
+  }
+  .flow-box .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .flow-box .num {
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 1;
+  }
+  .flow .arrow {
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--ink-mute);
+  }
+  .flow-box.out { background: var(--concrete-1); }
+  .flow-box.result.pos { border-color: var(--jungle); }
+  .flow-box.result.neg { border-color: var(--rust); }
+  .flow-box.result.pos .num { color: var(--jungle); }
+  .flow-box.result.neg .num { color: var(--rust); }
+  @media (max-width: 720px) {
+    .flow { grid-template-columns: 1fr; }
+    .flow .arrow { transform: rotate(90deg); }
+  }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="ruler" data-label="B / MONTHLY · 2026"></div>
+
+  <header class="masthead">
+    <div>
+      <h1 class="wordmark">KASIA <em>Ungasan</em></h1>
+      <p class="subtitle">Monthly Snapshot · Partner View</p>
+    </div>
+    <div class="masthead-right">
+      <strong id="m-title">—</strong><br/>
+      <span class="status" id="source-status">loading</span>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html">Quarterly</a>
+    <a href="monthly.html" class="active">Monthly</a>
+    <a href="historical.html">History</a>
+  </nav>
+
+  <div class="section-no">§ select month</div>
+  <div class="month-picker" id="month-picker" role="tablist" aria-label="Select month"></div>
+
+  <!-- HERO -->
+  <div class="hero-stat">
+    <div>
+      <h2 class="main-num" id="hero-net">—</h2>
+      <div class="main-label">Operating result · <span id="hero-month">—</span></div>
+      <div class="main-sub" id="hero-sub">Revenue less opex, before investor distributions.</div>
+    </div>
+    <aside>
+      <div>Revenue <b id="hero-rev">—</b></div>
+      <div>Op. cost <b id="hero-opex">—</b></div>
+      <div>Margin <b id="hero-margin">—</b></div>
+    </aside>
+  </div>
+
+  <!-- THE FLOW -->
+  <section>
+    <div class="section-no">§01 · The Flow</div>
+    <h3 class="section-title">How the month cleared</h3>
+    <p class="section-lede" id="flow-lede">—</p>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="label">Revenue in</div>
+        <div class="num pos" id="flow-rev">—</div>
+      </div>
+      <div class="arrow">─</div>
+      <div class="flow-box out">
+        <div class="label">Operating cost</div>
+        <div class="num" id="flow-opex">—</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin:-8px 0 8px;font-family:var(--mono);font-size:18px;color:var(--ink-mute)">↓</div>
+    <div class="flow">
+      <div class="flow-box out">
+        <div class="label">Investor distribution</div>
+        <div class="num" id="flow-payout">—</div>
+      </div>
+      <div class="arrow">=</div>
+      <div class="flow-box result" id="flow-result-box">
+        <div class="label">Cash delta</div>
+        <div class="num" id="flow-result">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section>
+    <div class="section-no">§02 · Channels</div>
+    <h3 class="section-title">How they booked</h3>
+    <div class="panel">
+      <div class="panel-label"><span>§02.1 — BOOKING CHANNELS</span><span class="note">IDR · % of room revenue</span></div>
+      <div class="bars" id="channel-bars"></div>
+    </div>
+  </section>
+
+  <!-- COSTS -->
+  <section>
+    <div class="section-no">§03 · Costs</div>
+    <h3 class="section-title">Where the money went</h3>
+    <div class="panel">
+      <div class="panel-label"><span>§03.1 — COST LINES</span><span class="note">ranked · operating only</span></div>
+      <table class="tbl" id="costs-tbl">
+        <thead><tr><th>Line</th><th class="num">Amount</th><th class="num">% of opex</th></tr></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- CAFE -->
+  <section>
+    <div class="section-no">§04 · Cafe</div>
+    <h3 class="section-title">Second line</h3>
+    <div class="panel">
+      <div class="panel-label"><span>§04.1 — CAFE</span></div>
+      <div class="cols-3">
+        <div><div class="kpi-label">Revenue</div><div class="kpi-value" id="cafe-rev">—</div></div>
+        <div><div class="kpi-label">Cost</div><div class="kpi-value" id="cafe-cost">—</div></div>
+        <div><div class="kpi-label">Net</div><div class="kpi-value" id="cafe-net">—</div><div class="kpi-sub" id="cafe-margin">—</div></div>
+      </div>
+      <div class="footnote" style="margin-top:18px">
+        <b>Footnote.</b> Photo studio this month: <span id="studio-inline">—</span>.
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>KASIA UNGASAN · MONTHLY SNAPSHOT</div>
+    <div>Data <span id="data-source">—</span> · <span id="gen-time">—</span></div>
+  </footer>
+
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let DATA = null, SOURCE = null, CURRENT = 0;
+
+(async function() {
+  const { data, source } = await loadYear(2026);
+  DATA = data; SOURCE = source;
+
+  const srcEl = document.getElementById('source-status');
+  srcEl.textContent = source === 'live' ? 'Live · Google Sheets' : 'Static · embedded';
+  srcEl.className = 'status ' + (source === 'live' ? 'live' : 'static');
+  document.getElementById('data-source').textContent = source === 'live' ? 'live' : 'embedded';
+  document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
+
+  buildPicker();
+  CURRENT = data.months.length - 1;  // latest month
+  renderMonth(CURRENT);
+})();
+
+function buildPicker() {
+  const picker = document.getElementById('month-picker');
+  const available = new Set(DATA.months.map(m => m.idx));
+  picker.innerHTML = MONTHS.map((name, i) => {
+    const disabled = !available.has(i);
+    return `<button data-idx="${i}" role="tab" ${disabled ? 'disabled' : ''}>${name}</button>`;
+  }).join('');
+  picker.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn || btn.disabled) return;
+    const idx = +btn.dataset.idx;
+    const pos = DATA.months.findIndex(m => m.idx === idx);
+    if (pos >= 0) { CURRENT = pos; renderMonth(pos); }
+  });
+}
+
+function renderMonth(pos) {
+  const mo = DATA.months[pos];
+  // highlight
+  document.querySelectorAll('#month-picker button').forEach(b => {
+    b.classList.toggle('active', +b.dataset.idx === mo.idx);
+  });
+
+  const rev = mo.hotel_revenue;
+  const opex = mo.hotel_expense_total - (mo.investor_payout||0) - (mo.investment||0);
+  const opResult = rev - opex;
+  const opMargin = opResult / (rev || 1);
+  const cashDelta = rev - mo.hotel_expense_total;
+
+  document.getElementById('m-title').textContent = MONTHS[mo.idx] + ' 2026';
+  document.getElementById('hero-month').textContent = MONTHS[mo.idx] + ' 2026';
+  document.getElementById('hero-net').textContent = fmtIDR(opResult);
+  document.getElementById('hero-rev').textContent = fmtIDR(rev);
+  document.getElementById('hero-opex').textContent = fmtIDR(opex);
+  document.getElementById('hero-margin').textContent = fmtPct(opMargin);
+
+  // Flow lede
+  let lede;
+  if (mo.investor_payout > 0) {
+    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtIDR(opResult))} in operating profit on ${esc(fmtIDR(rev))} of room revenue. Investor distributions of ${esc(fmtIDR(mo.investor_payout))} were paid out, producing a reported cash delta of ${esc(fmtIDR(cashDelta))}.`;
+  } else {
+    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtIDR(opResult))} on ${esc(fmtIDR(rev))} of room revenue. No investor distribution this month — the full operating result flows to balance.`;
+  }
+  document.getElementById('flow-lede').innerHTML = lede;
+
+  document.getElementById('flow-rev').textContent  = fmtIDR(rev);
+  document.getElementById('flow-opex').textContent = fmtIDR(opex);
+  document.getElementById('flow-payout').textContent = fmtIDR(mo.investor_payout || 0);
+  document.getElementById('flow-result').textContent = fmtIDR(cashDelta);
+  const resultBox = document.getElementById('flow-result-box');
+  resultBox.classList.remove('pos','neg');
+  resultBox.classList.add(cashDelta >= 0 ? 'pos' : 'neg');
+
+  // Channels
+  const ch = [
+    ["Direct (transfer)", mo.transfer||0],
+    ["Airbnb", mo.airbnb||0],
+    ["Agoda", mo.agoda||0],
+    ["EDC (card)", mo.edc||0],
+    ["Cash", mo.cash||0],
+  ];
+  const chTotal = ch.reduce((a,[,v]) => a+v, 0) || 1;
+  const chMax = Math.max(...ch.map(e => e[1]), 1);
+  document.getElementById('channel-bars').innerHTML = ch.map(([label, v]) => `
+    <div class="bar-row">
+      <div class="label">${esc(label)}</div>
+      <div class="track"><div class="fill" style="width:${(v/chMax*100).toFixed(1)}%"></div></div>
+      <div class="val">${esc(fmtIDR(v))} · ${esc(fmtPct(v/chTotal))}</div>
+    </div>`).join('');
+
+  // Costs table (single month)
+  const costLines = [
+    ["Salary & Wages", mo.salary||0],
+    ["Utilities", mo.utilities||0],
+    ["Laundry", mo.laundry||0],
+    ["Maintenance", mo.maintenance||0],
+    ["Marketing & Sales", mo.marketing||0],
+    ["Supplies", mo.supplies||0],
+    ["Local & Community", mo.local||0],
+    ["Legal & Permits", mo.legal||0],
+    ["Assets", mo.assets||0],
+    ["Bank Credit", mo.bank_credit||0],
+    ["Taxes", mo.taxes||0],
+  ].filter(e => e[1] > 0).sort((a,b) => b[1]-a[1]);
+  const costTotal = costLines.reduce((a,[,v]) => a+v, 0) || 1;
+  document.querySelector('#costs-tbl tbody').innerHTML = costLines.map(([n,v]) => `
+    <tr><td><strong>${esc(n)}</strong></td><td class="num">${esc(fmtIDR(v))}</td><td class="num muted">${esc(fmtPct(v/costTotal))}</td></tr>
+  `).join('');
+  document.querySelector('#costs-tbl tfoot').innerHTML = `
+    <tr class="total"><td>Total</td><td class="num">${esc(fmtIDR(costTotal))}</td><td class="num">100%</td></tr>`;
+
+  // Cafe
+  const cafeRev = mo.cafe_revenue||0, cafeCost = mo.cafe_expense||0;
+  const cafeNet = cafeRev - cafeCost;
+  document.getElementById('cafe-rev').textContent = fmtIDR(cafeRev);
+  document.getElementById('cafe-cost').textContent = fmtIDR(cafeCost);
+  document.getElementById('cafe-net').textContent = fmtIDR(cafeNet);
+  const cmEl = document.getElementById('cafe-margin');
+  const cm = cafeNet / (cafeRev || 1);
+  cmEl.textContent = fmtPct(cm) + ' margin';
+  cmEl.classList.remove('pos','neg');
+  cmEl.classList.add(cm >= 0 ? 'pos' : 'neg');
+  document.getElementById('studio-inline').textContent = fmtIDR(mo.studio_revenue||0);
+
+  // Scroll into view on picker click (not on initial render)
+  if (window.__kasia_init_done) {
+    document.querySelector('.hero-stat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.__kasia_init_done = true;
+}
+</script>
+</body>
+</html>
