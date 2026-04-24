@@ -220,7 +220,10 @@ let DATA = null, SOURCE = null, CURRENT = 0;
   document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
 
   buildPicker();
-  CURRENT = data.months.length - 1;  // latest month
+  // Default to current calendar month if it's in the data; otherwise latest available.
+  const nowMonthIdx = new Date().getMonth();
+  const currentPos = data.months.findIndex(m => m.idx === nowMonthIdx);
+  CURRENT = currentPos >= 0 ? currentPos : data.months.length - 1;
   renderMonth(CURRENT);
 })();
 
