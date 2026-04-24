@@ -220,8 +220,11 @@ let DATA = null, SOURCE = null, CURRENT = 0;
   document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
 
   buildPicker();
-  // Default to the most recent month with data.
-  CURRENT = data.months.length - 1;
+  // Default to the previous calendar month (e.g. in April → March).
+  // Fall back to the latest month with data if the previous month isn't in the dataset yet.
+  const prevMonthIdx = (new Date().getMonth() - 1 + 12) % 12;
+  const prevPos = data.months.findIndex(m => m.idx === prevMonthIdx);
+  CURRENT = prevPos >= 0 ? prevPos : data.months.length - 1;
   renderMonth(CURRENT);
 })();
 
