@@ -94,6 +94,54 @@
     .mini-grid { grid-template-columns: repeat(2, 1fr); }
   }
   .arc-chart { margin: 32px 0; }
+  .occ-strip {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border: 1px solid var(--stroke-strong);
+    border-top: 0;
+    margin: -20px 0 20px;
+    background: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .occ-strip .key {
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 9.5px;
+  }
+  .occ-strip .val {
+    color: var(--jungle);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .occ-strip .sep {
+    color: var(--stroke-strong);
+    padding: 0 4px;
+  }
+  .occ-strip .annual {
+    margin-left: auto;
+    color: var(--ink-soft);
+  }
+  .occ-spark {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 22px;
+  }
+  .occ-spark span {
+    display: block;
+    width: 6px;
+    background: var(--jungle);
+    opacity: 0.85;
+  }
+  .occ-spark span.empty { background: var(--stroke-soft); opacity: 0.45; }
+  .occ-spark span.transition { background: var(--ink-mute); }
 </style>
 </head>
 <body>
@@ -127,7 +175,7 @@
       Four years of bank books. A construction year that absorbed the cost of existing. A first full year that learned the shape of demand. A stability year with the first profitable hotel line. A current year that has to prove it's repeatable.
     </p>
     <p class="section-lede" style="margin-top:18px">
-      Numbers here are aggregated from KASIA's bank ledgers — the only numbers that are truly audited. Underlying bookings, occupancy and ADR aren't in this record; they live in the PMS and will be folded into future reports once the export is wired.
+      Numbers here are aggregated from KASIA's bank ledgers — the audited backbone. Occupancy is layered in from the booking system: the legacy system fed 2023–2025 monthly; the new PMS came online December 2025 and currently reports a 5-month rolling aggregate. ADR and RevPAR still pending reconciliation.
     </p>
   </section>
 
@@ -158,6 +206,14 @@
         <div class="mini"><div class="label">Total expense</div><div class="num" id="y23-exp">—</div><div class="sub">ops + construction</div></div>
         <div class="mini"><div class="label">Balance</div><div class="num neg" id="y23-bal">—</div><div class="sub">capex-heavy</div></div>
       </div>
+      <div class="occ-strip">
+        <span class="key">Occupancy</span>
+        <span class="occ-spark" id="y23-occ-spark"></span>
+        <span class="sep">·</span>
+        <span class="key">Annual avg</span>
+        <span class="val" id="y23-occ-avg">—</span>
+        <span class="annual">Jan 13% (pre-open) · Mar–Sep ≥96%</span>
+      </div>
       <div class="callout warn">
         <strong>Read with care.</strong> Rp 823 M of the 2023 expense total was construction finishings + assets. Pull those out and the operational break-even story becomes visible.
       </div>
@@ -180,6 +236,14 @@
         <div class="mini"><div class="label">Cafe + studio</div><div class="num" id="y24-cafe">—</div><div class="sub">launched Q2</div></div>
         <div class="mini"><div class="label">Reinvestment</div><div class="num" id="y24-inv">—</div><div class="sub">booked as expense</div></div>
         <div class="mini"><div class="label">Total balance</div><div class="num pos" id="y24-balall">—</div><div class="sub">all lines</div></div>
+      </div>
+      <div class="occ-strip">
+        <span class="key">Occupancy</span>
+        <span class="occ-spark" id="y24-occ-spark"></span>
+        <span class="sep">·</span>
+        <span class="key">Annual avg</span>
+        <span class="val" id="y24-occ-avg">—</span>
+        <span class="annual">Floor 79% (Oct) · ceiling 98% (Feb / Jun)</span>
       </div>
       <div class="callout">
         <strong>Channel inversion.</strong> Direct (transfer) overtook Airbnb as the primary booking source in Q3 2024 and has held that position since. This is the structural margin advantage KASIA operates with.
@@ -204,6 +268,14 @@
         <div class="mini"><div class="label">Investor payout</div><div class="num" id="y25-payout">—</div><div class="sub">distributed</div></div>
         <div class="mini"><div class="label">Hotel balance</div><div class="num pos" id="y25-bal">—</div><div class="sub">first profitable</div></div>
       </div>
+      <div class="occ-strip">
+        <span class="key">Occupancy</span>
+        <span class="occ-spark" id="y25-occ-spark"></span>
+        <span class="sep">·</span>
+        <span class="key">Annual avg</span>
+        <span class="val" id="y25-occ-avg">—</span>
+        <span class="annual">Dec dropped to 55% — booking system was mid-migration, not a real demand collapse</span>
+      </div>
       <div class="callout">
         <strong>Channel stability.</strong> Bank transfer (direct): ~58% of room revenue. Airbnb: ~40%. Agoda and EDC combined: ~2%. The 2024 inversion held.
       </div>
@@ -224,7 +296,20 @@
         <div class="mini"><div class="label">Q1 revenue</div><div class="num" id="y26-rev">—</div><div class="sub">rooms</div></div>
         <div class="mini"><div class="label">Q1 op. profit</div><div class="num pos" id="y26-op">—</div><div class="sub">ex. distributions</div></div>
         <div class="mini"><div class="label">Q1 op. margin</div><div class="num" id="y26-marg">—</div><div class="sub">revenue − opex</div></div>
-        <div class="mini"><div class="label">Trajectory</div><div class="num">→</div><div class="sub">see quarterly</div></div>
+        <div class="mini"><div class="label">PMS occupancy</div><div class="num" id="y26-occ">—</div><div class="sub">5-mo aggregate</div></div>
+      </div>
+      <div class="occ-strip">
+        <span class="key">New PMS · Dec 25 – Apr 26</span>
+        <span class="val" id="y26-occ-strip">—</span>
+        <span class="sep">·</span>
+        <span class="key">Nights</span>
+        <span class="val" id="y26-nights-strip">—</span>
+        <span class="sep">·</span>
+        <span class="key">ALOS</span>
+        <span class="val" id="y26-alos-strip">—</span>
+        <span class="sep">·</span>
+        <span class="key">Lead time</span>
+        <span class="val" id="y26-lead-strip">—</span>
       </div>
       <p><a href="index.html">See Q1 2026 in detail →</a></p>
     </div>
@@ -296,6 +381,9 @@
   document.getElementById('y26-op').textContent = fmtIDR(m26.op_profit);
   document.getElementById('y26-marg').textContent = fmtPct(m26.op_margin);
 
+  // Occupancy — per year sparks + annual avg
+  renderOccupancyStrips();
+
   // Arc chart — yearly revenue
   renderArc({
     2023: h23.total_revenue + h23.total_other_income,
@@ -352,6 +440,49 @@ function renderArc(data) {
       </g>
     </svg>`;
 }
+
+function renderOccupancyStrips() {
+  if (!window.KASIA_OCCUPANCY) return;
+  const occ = window.KASIA_OCCUPANCY;
+  [2023, 2024, 2025].forEach(year => {
+    const arr = occ.byYear[year] || [];
+    const sparkEl = document.getElementById(`y${String(year).slice(2)}-occ-spark`);
+    if (sparkEl) {
+      sparkEl.innerHTML = arr.map((v, i) => {
+        if (v == null) return '<span class="empty" style="height:3px"></span>';
+        // Flag the Dec 2025 transition reading visually
+        const isTransition = (year === 2025 && i === 11);
+        const cls = isTransition ? 'transition' : '';
+        const h = Math.max(3, Math.round(v * 22));
+        const t = isTransition
+          ? `Dec ${year}: ${fmtPct(v)} — booking system in mid-migration`
+          : `${MONTH_NAMES[i]} ${year}: ${fmtPct(v)}`;
+        return `<span class="${cls}" style="height:${h}px" title="${t}"></span>`;
+      }).join('');
+    }
+    const avg = occ.annualAvg(year);
+    const avgEl = document.getElementById(`y${String(year).slice(2)}-occ-avg`);
+    if (avgEl && avg != null) {
+      avgEl.textContent = fmtPct(avg) + (year === 2025 ? ' (Jan–Nov)' : '');
+    }
+  });
+  // 2026 — aggregate strip + mini stat
+  const ns = occ.newSystem;
+  if (ns) {
+    const miniEl = document.getElementById('y26-occ');
+    if (miniEl) miniEl.textContent = fmtPct(ns.avgOccupancy);
+    const stripEl = document.getElementById('y26-occ-strip');
+    if (stripEl) stripEl.textContent = fmtPct(ns.avgOccupancy);
+    const nightsEl = document.getElementById('y26-nights-strip');
+    if (nightsEl) nightsEl.textContent =
+      ns.occupiedRoomNights.toLocaleString('en-US') + ' / ' + ns.totalRoomNights.toLocaleString('en-US');
+    const alosEl = document.getElementById('y26-alos-strip');
+    if (alosEl) alosEl.textContent = ns.avgLengthOfStay + ' nights';
+    const leadEl = document.getElementById('y26-lead-strip');
+    if (leadEl) leadEl.textContent = ns.avgLeadTimeDays + ' days';
+  }
+}
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 </script>
 </body>
 </html>

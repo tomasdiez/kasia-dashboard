@@ -62,8 +62,8 @@
         Direct bookings (transfer) delivered <span id="direct-share">—</span> of room revenue. Airbnb held its share. Agoda was just switched on in February.
       </div>
       <div class="callout">
-        <strong>What we don't see yet.</strong>
-        Occupancy, ADR and RevPAR need a booking-system export. The KPI block is flagged <em>coming soon</em> until the PMS feed is wired.
+        <strong>Booking metrics, partial.</strong>
+        The new PMS came online in December 2025. Occupancy and stay-length figures are aggregated for its first 5 months (Dec 25 – Apr 26), not split per quarter yet. ADR / RevPAR still pending — the bank book sees money, not room-nights.
       </div>
     </div>
   </section>
@@ -98,25 +98,28 @@
     <div class="kpi-grid" style="margin-top:1px">
       <div class="kpi">
         <div class="kpi-label">Occupancy</div>
-        <div class="kpi-value muted">—</div>
-        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">ADR</div>
-        <div class="kpi-value muted">—</div>
-        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">RevPAR</div>
-        <div class="kpi-value muted">—</div>
-        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+        <div class="kpi-value" id="kpi-occ">—</div>
+        <div class="kpi-sub" id="kpi-occ-sub">PMS · Dec 25 – Apr 26</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Nights Sold</div>
-        <div class="kpi-value muted">—</div>
-        <div class="kpi-sub coming">coming soon · PMS feed pending</div>
+        <div class="kpi-value" id="kpi-nights">—</div>
+        <div class="kpi-sub" id="kpi-nights-sub">of available</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg. Length of Stay</div>
+        <div class="kpi-value" id="kpi-alos">—</div>
+        <div class="kpi-sub">nights · PMS rolling</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Lead Time</div>
+        <div class="kpi-value" id="kpi-lead">—</div>
+        <div class="kpi-sub">days · book-to-arrival</div>
       </div>
     </div>
+    <p class="footnote" style="margin-top:14px">
+      <strong>Note.</strong> These figures are the new PMS's aggregate for its first 5 operating months, not a clean quarterly cut. ADR and RevPAR are still pending — the PMS reports gross revenue in IDR (the original "USD" axis label in the source charts is incorrect), and reconciliation against the bank book is in progress.
+    </p>
   </section>
 
   <!-- MONTHLY BARS -->
@@ -205,7 +208,7 @@
         <ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:1.7">
           <li>— Keep pushing direct bookings. Every Rp 100 M through transfer is ~Rp 20 M kept.</li>
           <li>— Hold Agoda at current listing through Q2 as a data collection exercise.</li>
-          <li>— Wire the PMS export into the dashboard (occupancy / ADR / RevPAR).</li>
+          <li>— Close out the PMS reconciliation: month-level occupancy + clean ADR / RevPAR (currently only 5-month aggregate).</li>
         </ul>
       </div>
       <div class="panel">
@@ -270,6 +273,18 @@
   const balSub = document.getElementById('kpi-balance-sub');
   balSub.textContent = (balance >= 0 ? 'Net of distributions' : 'After ' + fmtIDR(febPayout) + ' payout');
   balSub.classList.add(balance >= 0 ? 'pos' : 'neg');
+
+  // Occupancy KPIs (new PMS aggregate, Dec 25 – Apr 26)
+  const occ = window.KASIA_OCCUPANCY && window.KASIA_OCCUPANCY.newSystem;
+  if (occ) {
+    document.getElementById('kpi-occ').textContent = fmtPct(occ.avgOccupancy);
+    document.getElementById('kpi-occ-sub').textContent = 'PMS · ' + occ.rangeShort;
+    document.getElementById('kpi-nights').textContent =
+      occ.occupiedRoomNights.toLocaleString('en-US') + ' / ' + occ.totalRoomNights.toLocaleString('en-US');
+    document.getElementById('kpi-nights-sub').textContent = 'occupied / available · ' + occ.rangeShort;
+    document.getElementById('kpi-alos').textContent = occ.avgLengthOfStay;
+    document.getElementById('kpi-lead').textContent = occ.avgLeadTimeDays;
+  }
 
   // Direct retained estimate (20% blended commission)
   const directRetained = m.channels.transfer * 0.20;

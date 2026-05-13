@@ -123,6 +123,7 @@
       <div>Revenue <b id="hero-rev">—</b></div>
       <div>Op. cost <b id="hero-opex">—</b></div>
       <div>Margin <b id="hero-margin">—</b></div>
+      <div>Occupancy <b id="hero-occ">—</b></div>
     </aside>
   </div>
 
@@ -197,6 +198,10 @@
     </div>
   </section>
 
+  <p class="footnote" style="margin-top:14px">
+    <b>* Occupancy.</b> 5-month aggregate from the new PMS (1 Dec 2025 – 1 May 2026). Per-month split not yet reconciled, so the same figure shows for every 2026 month for now.
+  </p>
+
   <footer class="foot">
     <div>KASIA UNGASAN · MONTHLY SNAPSHOT</div>
     <div>Data <span id="data-source">—</span> · <span id="gen-time">—</span></div>
@@ -263,6 +268,14 @@ function renderMonth(pos) {
   document.getElementById('hero-rev').textContent = fmtIDR(rev);
   document.getElementById('hero-opex').textContent = fmtIDR(opex);
   document.getElementById('hero-margin').textContent = fmtPct(opMargin);
+
+  // Occupancy — 2026 has no per-month PMS data yet, only a 5-month aggregate.
+  const occAgg = window.KASIA_OCCUPANCY && window.KASIA_OCCUPANCY.newSystem;
+  const occEl = document.getElementById('hero-occ');
+  if (occAgg) {
+    occEl.textContent = fmtPct(occAgg.avgOccupancy) + '*';
+    occEl.title = 'PMS aggregate ' + occAgg.range + ' — per-month not yet split out.';
+  }
 
   // Flow lede
   let lede;

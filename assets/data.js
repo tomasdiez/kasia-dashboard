@@ -194,6 +194,48 @@ window.KASIA_2026_EMBEDDED = {
   ]
 };
 
+// --------- OCCUPANCY (PMS export, manual snapshot) -----------
+// Monthly figures for 2023/2024/2025 are from the legacy booking system
+// (occupancy report screenshots, captured 2026-05). 2026 has no per-month
+// breakdown yet — only an aggregate from the new system covering 1 Dec 2025
+// through 1 May 2026. Don't synthesize per-month 2026 numbers.
+window.KASIA_OCCUPANCY = {
+  // monthly occupancy as fractions (0–1), one entry per Jan–Dec, or null if missing
+  byYear: {
+    2023: [0.13, 0.80, 0.98, 0.98, 0.98, 0.98, 0.96, 0.96, 0.98, 0.92, 0.75, 0.70],
+    2024: [0.93, 0.98, 0.93, 0.94, 0.94, 0.98, 0.94, 0.96, 0.97, 0.79, 0.93, 0.92],
+    // Dec 2025 (0.55) reads low because the booking system was being
+    // migrated mid-month. Treat as a transition artifact, not real demand.
+    2025: [0.90, 0.95, 0.85, 0.85, 0.91, 0.94, 0.96, 0.96, 0.87, 0.87, 0.81, 0.55],
+    2026: [null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  // New PMS aggregate. The old and new systems overlap in Dec 2025.
+  newSystem: {
+    range: "1 Dec 2025 – 1 May 2026",
+    rangeShort: "Dec 25 – Apr 26",
+    totalRoomNights: 1281,
+    occupiedRoomNights: 1075,
+    closedRoomNights: 0,
+    unoccupiedRoomNights: 206,
+    avgOccupancy: 0.84,
+    avgLengthOfStay: 7,
+    avgLeadTimeDays: 12,
+    note: "New PMS, 5-month rolling window through Apr 2026. Overlaps the old system in Dec 2025.",
+  },
+  // Annual averages computed from the monthly array (excluding nulls and
+  // — for 2025 — December's transition reading).
+  annualAvg(year) {
+    const arr = (this.byYear[year] || []).filter(v => v != null);
+    if (!arr.length) return null;
+    if (year === 2025) {
+      // Drop the Dec 2025 cutover reading from the annual average.
+      const clean = this.byYear[2025].slice(0, 11).filter(v => v != null);
+      return clean.reduce((a,b) => a+b, 0) / clean.length;
+    }
+    return arr.reduce((a,b) => a+b, 0) / arr.length;
+  },
+};
+
 // --------- FORMATTERS ----------------------------------------
 const trimDec = s => s.replace(/\.0+(?=\s|$)/, '');
 window.fmtIDR = n => {
