@@ -334,16 +334,26 @@ window.parseSheet2026 = function(text) {
   };
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December","Desember"];
   const out = [];
-  rows.forEach(r => {
-    if (!r[0]) return;
-    const mIdx = MONTHS.findIndex(m => m.toLowerCase() === r[0].trim().toLowerCase());
-    if (mIdx < 0) return;
+  const seen = new Set();
+  // Stop at the first row whose date column is "TOTAL" — the sheet has a
+  // second analytical block below that (per-night metrics, etc.) which
+  // re-uses month labels and would otherwise be parsed as additional months.
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[0]) continue;
+    const cell = r[0].trim();
+    if (/^total/i.test(cell)) break;
+    const mIdx = MONTHS.findIndex(m => m.toLowerCase() === cell.toLowerCase());
+    if (mIdx < 0) continue;
+    const realIdx = mIdx === 12 ? 11 : mIdx;
+    if (seen.has(realIdx)) continue;        // guard against any further dupes
     const rev = C.hotel_revenue >= 0 ? parseNum(r[C.hotel_revenue]) : 0;
-    if (rev === 0 && !r.slice(1,28).some(c => c && c.trim())) return;
-    const m = { month: r[0].trim().slice(0,3), idx: mIdx === 12 ? 11 : mIdx };
+    if (rev === 0 && !r.slice(1,28).some(c => c && c.trim())) continue;
+    const m = { month: cell.slice(0,3), idx: realIdx };
     Object.keys(C).forEach(k => { m[k] = C[k] >= 0 ? parseNum(r[C[k]]) : 0; });
     out.push(m);
-  });
+    seen.add(realIdx);
+  }
   if (!out.length) throw new Error("no months parsed");
   return { year: 2026, months: out };
 };
