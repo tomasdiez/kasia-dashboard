@@ -290,12 +290,12 @@
       <span class="phase-tag">Year in progress</span>
     </div>
     <div>
-      <h3 id="y26-headline">Year in progress.</h3>
-      <p id="y26-narrative">The live quarterly and monthly views show this period in detail. The short version: operating profit held, investor distributions landed in February, Agoda was switched on as an experiment. What we're watching: whether the channel mix stabilizes at 60/35/5 (direct/Airbnb/Agoda+other), and whether the reinvestment envelope stays disciplined.</p>
+      <h3>Q1 cleared. Three quarters to go.</h3>
+      <p>The live quarterly and monthly views show Q1 in detail. The short version: operating profit held, investor distributions were made in February, Agoda was switched on as an experiment. What we're watching: whether the channel mix stabilizes at 60/35/5 (direct/Airbnb/Agoda+other), and whether the Q2 reinvestment envelope stays disciplined.</p>
       <div class="mini-grid">
-        <div class="mini"><div class="label"><span class="y26-period-label">Period</span> revenue</div><div class="num" id="y26-rev">—</div><div class="sub">rooms</div></div>
-        <div class="mini"><div class="label"><span class="y26-period-label">Period</span> op. profit</div><div class="num pos" id="y26-op">—</div><div class="sub">ex. distributions</div></div>
-        <div class="mini"><div class="label"><span class="y26-period-label">Period</span> op. margin</div><div class="num" id="y26-marg">—</div><div class="sub">revenue − opex</div></div>
+        <div class="mini"><div class="label">Q1 revenue</div><div class="num" id="y26-rev">—</div><div class="sub">rooms</div></div>
+        <div class="mini"><div class="label">Q1 op. profit</div><div class="num pos" id="y26-op">—</div><div class="sub">ex. distributions</div></div>
+        <div class="mini"><div class="label">Q1 op. margin</div><div class="num" id="y26-marg">—</div><div class="sub">revenue − opex</div></div>
         <div class="mini"><div class="label">PMS occupancy</div><div class="num" id="y26-occ">—</div><div class="sub">5-mo aggregate</div></div>
       </div>
       <div class="occ-strip">
@@ -311,7 +311,7 @@
         <span class="key">Lead time</span>
         <span class="val" id="y26-lead-strip">—</span>
       </div>
-      <p><a href="index.html">See <span class="y26-period-label">period</span> 2026 in detail →</a></p>
+      <p><a href="index.html">See Q1 2026 in detail →</a></p>
     </div>
   </div>
 
@@ -373,22 +373,10 @@
   document.getElementById('y25-bal').textContent = fmtIDR(h25.balance_hotel);
   document.getElementById('y25-cafenet-inline').textContent = fmtIDR(h25.cafe_studio_revenue - h25.cafe_expense);
 
-  // 2026 — all months with data so far
-  const MONTH_SHORT_26 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // 2026 Q1
   const { data: d26 } = await loadYear(2026);
-  const active26 = d26.months.filter(mo => (mo.hotel_revenue||0) > 0 || (mo.hotel_expense_total||0) > 0);
-  const period26 = { months: active26 };
-  const m26 = computeMetrics(period26);
-  const last26 = active26.length ? active26[active26.length-1] : null;
-  const first26 = active26.length ? active26[0] : null;
-  const range26 = active26.length
-    ? (active26.length === 1 ? MONTH_SHORT_26[first26.idx] : `${MONTH_SHORT_26[first26.idx]}–${MONTH_SHORT_26[last26.idx]}`)
-    : '—';
-  const tag26 = active26.length <= 3 ? 'Q1' : active26.length <= 6 ? 'H1' : active26.length <= 9 ? '9M' : 'YTD';
-  document.querySelectorAll('.y26-period-label').forEach(el => el.textContent = range26);
-  document.getElementById('y26-headline').textContent =
-    active26.length <= 3 ? `${tag26} cleared. ${12 - active26.length} months to go.` :
-    `${range26} 2026 · year in progress.`;
+  const q1 = { months: d26.months.slice(0, 3) };
+  const m26 = computeMetrics(q1);
   document.getElementById('y26-rev').textContent = fmtIDR(m26.revenue);
   document.getElementById('y26-op').textContent = fmtIDR(m26.op_profit);
   document.getElementById('y26-marg').textContent = fmtPct(m26.op_margin);
@@ -396,15 +384,12 @@
   // Occupancy — per year sparks + annual avg
   renderOccupancyStrips();
 
-  // Arc chart — yearly revenue. Extrapolate 2026 by annualizing the partial year.
-  const months26 = active26.length || 1;
-  const projectedAnnualRev = (m26.revenue + m26.cafe_rev + m26.studio_rev) * (12 / months26);
-  const projLabel = `2026 (${range26} × ${(12/months26).toFixed(months26 === 12 ? 0 : 1).replace(/\.0$/,'')})`;
+  // Arc chart — yearly revenue
   renderArc({
     2023: h23.total_revenue + h23.total_other_income,
     2024: h24.total_revenue_all,
     2025: h25.total_revenue_all,
-    [projLabel]: projectedAnnualRev,
+    "2026 (Q1 × 4)": m26.revenue * 4 + (m26.cafe_rev + m26.studio_rev) * 4,   // extrapolated
   });
 })();
 
@@ -425,7 +410,7 @@ function renderArc(data) {
   const bars = entries.map(([label, v], i) => {
     const cx = PAD_L + groupW * i + groupW / 2;
     const y = yScale(v);
-    const isProj = /×/.test(label);
+    const isProj = label.includes('Q1');
     const fill = isProj ? 'url(#hatch-arc)' : 'var(--jungle)';
     return `
       <g>
@@ -451,7 +436,7 @@ function renderArc(data) {
         <rect fill="var(--jungle)" x="0" y="-10" width="12" height="10"/>
         <text x="18" y="-1">Actual</text>
         <rect fill="url(#hatch-arc)" stroke="var(--ink)" stroke-width="0.5" x="70" y="-10" width="12" height="10"/>
-        <text x="88" y="-1">Projected (annualized)</text>
+        <text x="88" y="-1">Projected from Q1</text>
       </g>
     </svg>`;
 }

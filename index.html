@@ -13,7 +13,7 @@
 <body>
 <div class="frame">
 
-  <div class="ruler" id="page-ruler" data-label="A / OPERATING · 2026 · YTD"></div>
+  <div class="ruler" data-label="A / QUARTERLY · 2026 · Q1"></div>
 
   <header class="masthead">
     <div>
@@ -21,8 +21,8 @@
       <p class="subtitle">Operating Report · Partner View</p>
     </div>
     <div class="masthead-right">
-      <span id="period-tag">Year to date</span><br/>
-      <strong id="period-label">—</strong><br/>
+      Quarter One<br/>
+      <strong id="period-label">Jan – Mar 2026</strong><br/>
       <span class="status" id="source-status">loading</span>
     </div>
   </header>
@@ -37,7 +37,7 @@
   <div class="hero-stat">
     <div>
       <h2 class="main-num" id="hero-opprofit">—</h2>
-      <div class="main-label">Operating profit · <span id="hero-period">2026</span></div>
+      <div class="main-label">Operating profit · Q1 2026</div>
       <div class="main-sub" id="hero-sub">Revenue less operating costs, before investor distributions and reinvestment.</div>
     </div>
     <aside>
@@ -54,8 +54,8 @@
     <p class="lede" id="headline-lede">—</p>
     <div class="cols-3" style="margin-top:24px">
       <div class="callout">
-        <strong>What's distorting the cash signal.</strong>
-        Investor distributions in the period totaled <span id="feb-payout">—</span>. Stripping those out, the underlying hotel operation cleared <span class="num pos" id="underlying-profit">—</span>.
+        <strong>What changed this quarter.</strong>
+        Investor distributions landed in February (<span id="feb-payout">—</span>). Stripping those out, the underlying hotel operation cleared <span class="num pos" id="underlying-profit">—</span> on the quarter.
       </div>
       <div class="callout">
         <strong>Where the volume came from.</strong>
@@ -161,9 +161,9 @@
     <h3 class="section-title">What it costs to run the building</h3>
     <p class="section-lede">Labor and the credit line carry most of the load. A few one-off items (legal in January, asset purchases) inflated specific months but do not recur at the same scale.</p>
     <div class="panel">
-      <div class="panel-label"><span>§05.1 — OPERATING COSTS · <span class="period-inline">—</span></span><span class="note">IDR, ranked</span></div>
+      <div class="panel-label"><span>§05.1 — OPERATING COSTS · Q1 2026</span><span class="note">IDR, ranked</span></div>
       <table class="tbl" id="costs-tbl">
-        <thead><tr><th>Line</th><th>Note</th><th class="num">Period total</th><th class="num">% of opex</th></tr></thead>
+        <thead><tr><th>Line</th><th>Note</th><th class="num">Q1 total</th><th class="num">% of opex</th></tr></thead>
         <tbody></tbody>
         <tfoot></tfoot>
       </table>
@@ -174,9 +174,9 @@
   <section id="cafe">
     <div class="section-no">§06 · Cafe</div>
     <h3 class="section-title">The second revenue line</h3>
-    <p class="section-lede">Cafe operates near breakeven — priced for neighborhood, not margin. It's a guest amenity and a community anchor. The net signal matters less than whether it pulls traffic into the building.</p>
+    <p class="section-lede">Cafe operates near breakeven this quarter — priced for neighborhood, not margin. It's a guest amenity and a community anchor. The net signal matters less than whether it pulls traffic into the building.</p>
     <div class="panel">
-      <div class="panel-label"><span>§06.1 — CAFE P&amp;L · <span class="period-inline">—</span></span></div>
+      <div class="panel-label"><span>§06.1 — CAFE P&amp;L · Q1 2026</span></div>
       <div class="cols-3">
         <div>
           <div class="kpi-label">Revenue</div>
@@ -193,7 +193,7 @@
         </div>
       </div>
       <div class="footnote" style="margin-top:18px">
-        <b>Footnote.</b> Photo studio revenue for the period was <span id="studio-rev-inline">—</span>. Reported for completeness; not a strategic line at current volume.
+        <b>Footnote.</b> Photo studio revenue for Q1 was <span id="studio-rev-inline">—</span> across the quarter. Reported for completeness; not a strategic line at current volume.
       </div>
     </div>
   </section>
@@ -223,7 +223,7 @@
   </section>
 
   <footer class="foot">
-    <div>KASIA UNGASAN · PARTNER REPORT · <span id="footer-period">2026</span></div>
+    <div>KASIA UNGASAN · PARTNER REPORT · 2026 Q1</div>
     <div>Data <span id="data-source">—</span> · Generated <span id="gen-time">—</span></div>
   </footer>
 
@@ -232,32 +232,9 @@
 <script src="assets/data.js"></script>
 <script>
 (async function() {
-  const MONTH_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const { data, source } = await loadYear(2026);
-  // Only months that actually have data in the sheet. Months are sorted by
-  // calendar order by the parser, so the last one is the most recent.
-  const active = data.months.filter(mo => (mo.hotel_revenue || 0) > 0 || (mo.hotel_expense_total || 0) > 0);
-  const period = { months: active };
-  const m = computeMetrics(period);
-
-  const firstIdx = active.length ? active[0].idx : 0;
-  const lastIdx  = active.length ? active[active.length - 1].idx : 0;
-  const periodLabel = active.length
-    ? (firstIdx === lastIdx
-        ? `${MONTH_SHORT[firstIdx]} 2026`
-        : `${MONTH_SHORT[firstIdx]} – ${MONTH_SHORT[lastIdx]} 2026`)
-    : '— 2026';
-  const periodTag = active.length <= 3 ? 'Year to date · Q1' :
-                    active.length <= 6 ? 'Year to date · H1' :
-                    active.length <= 9 ? 'Year to date · 9M' : 'Year to date · Full';
-  document.getElementById('period-label').textContent = periodLabel;
-  document.getElementById('period-tag').textContent = periodTag;
-  document.getElementById('hero-period').textContent = periodLabel;
-  document.getElementById('footer-period').textContent = periodLabel;
-  document.querySelectorAll('.period-inline').forEach(el => el.textContent = periodLabel);
-  const ruler = document.getElementById('page-ruler');
-  if (ruler) ruler.setAttribute('data-label', `A / OPERATING · ${periodLabel}`);
+  const q1 = { months: data.months.slice(0, 3) };
+  const m = computeMetrics(q1);
 
   // Source status
   const srcEl = document.getElementById('source-status');
@@ -272,18 +249,14 @@
   document.getElementById('hero-opex').textContent = fmtIDR(m.opex);
   document.getElementById('hero-margin').textContent = fmtPct(m.op_margin);
 
-  // Headline lede — find the biggest investor distribution month (if any) for the callout
-  const payoutMonth = active.reduce((best, mo) => (mo.investor_payout||0) > (best?.investor_payout||0) ? mo : best, null);
-  const payoutAmount = payoutMonth ? payoutMonth.investor_payout : 0;
-  document.getElementById('feb-payout').textContent = fmtIDR(payoutAmount);
+  // Headline lede
+  const febPayout = q1.months[1].investor_payout;
+  document.getElementById('feb-payout').textContent = fmtIDR(febPayout);
   document.getElementById('underlying-profit').textContent = fmtIDR(m.op_profit);
   const directShare = m.channels.transfer / m.chan_total;
   document.getElementById('direct-share').textContent = fmtPct(directShare);
 
-  const payoutClause = payoutAmount > 0
-    ? ` The reported cash balance is dampened by ${esc(fmtIDR(payoutAmount))} of investor distributions paid out in ${MONTH_FULL[payoutMonth.idx]}. Strip those and the building paid for itself.`
-    : ' No investor distributions yet in this period — the full operating result is sitting on the balance.';
-  const lede = `${esc(periodLabel)} cleared ${esc(fmtIDR(m.op_profit))} in operating profit on ${esc(fmtIDR(m.revenue))} of room revenue — a ${esc(fmtPct(m.op_margin))} margin.${payoutClause}`;
+  const lede = `Q1 cleared ${esc(fmtIDR(m.op_profit))} in operating profit on ${esc(fmtIDR(m.revenue))} of room revenue — a ${esc(fmtPct(m.op_margin))} margin. The reported cash balance looks negative because ${esc(fmtIDR(febPayout))} of investor distributions were paid out in February. Strip those and the building paid for itself this quarter.`;
   document.getElementById('headline-lede').innerHTML = lede;
 
   // KPIs
@@ -362,7 +335,7 @@ function renderMonthlyChart(m) {
   }).join('');
 
   document.getElementById('month-chart').innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly revenue versus operating cost, 2026" style="width:100%;height:auto;display:block">
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly revenue versus operating cost, Q1 2026" style="width:100%;height:auto;display:block">
       <defs>
         <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <rect width="6" height="6" fill="var(--concrete-1)"/>
