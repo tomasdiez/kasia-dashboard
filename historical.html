@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>KASIA Ungasan · History</title>
-<meta name="description" content="KASIA Ungasan — historical narrative 2023–2026. Construction, stabilization, profitability." />
+<meta name="description" content="KASIA Ungasan — historical narrative 2023–2026. Construction, stabilization, profitability. IDR / USD / EUR." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -45,6 +45,14 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--ink);
+  }
+  .phase .fx-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    margin-top: 10px;
+    line-height: 1.5;
   }
   .phase h3 {
     font-family: var(--display);
@@ -145,6 +153,18 @@
 </style>
 </head>
 <body>
+
+<!-- Login overlay -->
+<div id="login-overlay" class="hidden">
+  <div class="login-box">
+    <h2>KASIA Ungasan</h2>
+    <p>Enter the password to view the dashboard.</p>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+    <button id="login-btn">Enter</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
 <div class="frame">
 
   <div class="ruler" data-label="C / HISTORY · 2023 – 2026"></div>
@@ -158,6 +178,7 @@
       From ground-up<br/>
       <strong>2023 — Today</strong><br/>
       <span class="status static">archival</span>
+      <div id="cur-switch"></div>
     </div>
   </header>
 
@@ -184,8 +205,30 @@
     <div class="section-no">§00 · Four-year arc</div>
     <h3 class="section-title">Revenue trajectory</h3>
     <div class="panel">
-      <div class="panel-label"><span>§00.1 — YEARLY REVENUE</span><span class="note">IDR · hotel + cafe + studio</span></div>
+      <div class="panel-label"><span>§00.1 — YEARLY REVENUE</span><span class="note" id="arc-note">IDR · hotel + cafe + studio</span></div>
       <div id="arc-chart" class="arc-chart"></div>
+    </div>
+  </section>
+
+  <!-- FX ARC -->
+  <section>
+    <div class="section-no">§00b · Currency</div>
+    <h3 class="section-title">The same building, measured three ways</h3>
+    <p class="section-lede" id="fx-lede">—</p>
+    <div class="panel">
+      <div class="panel-label"><span>§00b.1 — REVENUE BY CURRENCY</span><span class="note">each month converted at its own average rate, then summed</span></div>
+      <table class="tbl" id="fx-tbl">
+        <thead><tr>
+          <th>Year</th>
+          <th class="num">Revenue (IDR)</th>
+          <th class="num">USD</th>
+          <th class="num">EUR</th>
+          <th class="num">Blended IDR/USD</th>
+          <th class="num">Blended IDR/EUR</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="footnote" style="margin-top:14px" id="fx-tbl-note">—</div>
     </div>
   </section>
 
@@ -195,14 +238,15 @@
       <div class="marker">§01 · The build</div>
       <div class="year">2023</div>
       <span class="phase-tag">Construction + Launch</span>
+      <div class="fx-note" id="y23-fx"></div>
     </div>
     <div>
       <h3>The year of existing.</h3>
       <p>Built and opened. The first four months (soft launch, Jan–Apr) ran at a structural deficit: the building was still absorbing finishing costs that had nothing to do with whether guests were showing up. May through December reached operating break-even and generated Rp 1.18 B in revenue — respectable for a property in its first half-year.</p>
       <p>The Rp 370 M deficit reported for the year is almost entirely capital: finishings, fit-out, legal setup. Nothing that recurs. Read 2023 as a line-item, not a performance year.</p>
       <div class="mini-grid">
-        <div class="mini"><div class="label">Total revenue</div><div class="num" id="y23-rev">—</div><div class="sub">rooms only</div></div>
-        <div class="mini"><div class="label">Other income</div><div class="num" id="y23-other">—</div><div class="sub">events / misc</div></div>
+        <div class="mini"><div class="label">Total revenue</div><div class="num" id="y23-rev">—</div><div class="sub">rooms + other income</div></div>
+        <div class="mini"><div class="label">of which other income</div><div class="num" id="y23-other">—</div><div class="sub">events / misc · incl. above</div></div>
         <div class="mini"><div class="label">Total expense</div><div class="num" id="y23-exp">—</div><div class="sub">ops + construction</div></div>
         <div class="mini"><div class="label">Balance</div><div class="num neg" id="y23-bal">—</div><div class="sub">capex-heavy</div></div>
       </div>
@@ -226,6 +270,7 @@
       <div class="marker">§02 · The learning</div>
       <div class="year">2024</div>
       <span class="phase-tag">First full year</span>
+      <div class="fx-note" id="y24-fx"></div>
     </div>
     <div>
       <h3>The year of finding the shape of demand.</h3>
@@ -246,7 +291,7 @@
         <span class="annual">Floor 79% (Oct) · ceiling 98% (Feb / Jun)</span>
       </div>
       <div class="callout">
-        <strong>Channel inversion.</strong> Direct (transfer) overtook Airbnb as the primary booking source in Q3 2024 and has held that position since. This is the structural margin advantage KASIA operates with.
+        <strong>Channel inversion.</strong> Direct (transfer) overtook Airbnb as the primary booking source in Q3 2024 and has held that position since — until Q2 2026, when it reversed again. See the quarterly view.
       </div>
     </div>
   </div>
@@ -257,13 +302,14 @@
       <div class="marker">§03 · The proof</div>
       <div class="year">2025</div>
       <span class="phase-tag">Stability</span>
+      <div class="fx-note" id="y25-fx"></div>
     </div>
     <div>
       <h3>The year the hotel line turned profitable.</h3>
       <p>First year with a positive hotel balance on its own — Rp 74 M after everything (opex, credit, distributions, taxes). Less dramatic than the 2024 reinvestment year on paper, but structurally more important: it showed the operation can clear its own costs without leaning on capital subsidy.</p>
       <p>The cafe grew <strong>4×</strong> — from Rp 75 M to Rp 290 M — but it operated near breakeven (<span class="num" id="y25-cafenet-inline">—</span>). Priced for neighborhood, not margin. Investor distributions of Rp 223 M were paid out during the year without tipping the hotel line negative.</p>
       <div class="mini-grid">
-        <div class="mini"><div class="label">Hotel revenue</div><div class="num" id="y25-rev">—</div><div class="sub">+0.4% YoY</div></div>
+        <div class="mini"><div class="label">Hotel revenue</div><div class="num" id="y25-rev">—</div><div class="sub">+0.4% YoY in IDR</div></div>
         <div class="mini"><div class="label">Cafe + studio</div><div class="num" id="y25-cafe">—</div><div class="sub">4× growth</div></div>
         <div class="mini"><div class="label">Investor payout</div><div class="num" id="y25-payout">—</div><div class="sub">distributed</div></div>
         <div class="mini"><div class="label">Hotel balance</div><div class="num pos" id="y25-bal">—</div><div class="sub">first profitable</div></div>
@@ -287,15 +333,17 @@
     <div>
       <div class="marker">§04 · The current year</div>
       <div class="year">2026</div>
-      <span class="phase-tag">Year in progress</span>
+      <span class="phase-tag" id="y26-tag">Year in progress</span>
+      <div class="fx-note" id="y26-fx"></div>
     </div>
     <div>
-      <h3>Q1 cleared. Three quarters to go.</h3>
-      <p>The live quarterly and monthly views show Q1 in detail. The short version: operating profit held, investor distributions were made in February, Agoda was switched on as an experiment. What we're watching: whether the channel mix stabilizes at 60/35/5 (direct/Airbnb/Agoda+other), and whether the Q2 reinvestment envelope stays disciplined.</p>
+      <h3 id="y26-title">Year to date.</h3>
+      <p id="y26-para1">—</p>
+      <p id="y26-para2">—</p>
       <div class="mini-grid">
-        <div class="mini"><div class="label">Q1 revenue</div><div class="num" id="y26-rev">—</div><div class="sub">rooms</div></div>
-        <div class="mini"><div class="label">Q1 op. profit</div><div class="num pos" id="y26-op">—</div><div class="sub">ex. distributions</div></div>
-        <div class="mini"><div class="label">Q1 op. margin</div><div class="num" id="y26-marg">—</div><div class="sub">revenue − opex</div></div>
+        <div class="mini"><div class="label" id="y26-l1">YTD revenue</div><div class="num" id="y26-rev">—</div><div class="sub">rooms</div></div>
+        <div class="mini"><div class="label">YTD op. profit</div><div class="num pos" id="y26-op">—</div><div class="sub">ex. distributions</div></div>
+        <div class="mini"><div class="label">YTD op. margin</div><div class="num" id="y26-marg">—</div><div class="sub">revenue − opex</div></div>
         <div class="mini"><div class="label">PMS occupancy</div><div class="num" id="y26-occ">—</div><div class="sub">5-mo aggregate</div></div>
       </div>
       <div class="occ-strip">
@@ -311,7 +359,7 @@
         <span class="key">Lead time</span>
         <span class="val" id="y26-lead-strip">—</span>
       </div>
-      <p><a href="index.html">See Q1 2026 in detail →</a></p>
+      <p><a href="index.html">See the quarterly breakdown →</a></p>
     </div>
   </div>
 
@@ -323,8 +371,8 @@
       <div class="panel">
         <div class="panel-label"><span>§05.1 — STRUCTURAL</span></div>
         <div style="font-size:14.5px;line-height:1.65">
-          <p><strong>Direct bookings are the moat.</strong> They compounded through 2024, held in 2025, and remained dominant in 2026 Q1. Every Rp 100 M of direct revenue is ~Rp 20 M in retained commission vs. the OTA baseline. This is the single most important pattern in the data.</p>
-          <p><strong>Reinvestment was heavy in 2024, lighter in 2025.</strong> The Rp 545 M spent in 2024 moved the property into its 2025 stability. 2025's lighter reinvestment (Rp 52 M) is the baseline to decide whether 2026 returns to 2024 levels or holds.</p>
+          <p><strong>Direct bookings were the moat — and the moat is draining.</strong> Direct compounded through 2024, held through 2025 and Q1 2026, then more than halved in Q2 2026 while OTA channels absorbed the volume. Top-line revenue barely moved, which is exactly what makes it easy to miss. Every Rp 100 M that shifts from direct to OTA is roughly Rp 20 M of margin handed away.</p>
+          <p><strong>Reinvestment was heavy in 2024, lighter since.</strong> The Rp 545 M spent in 2024 moved the property into its 2025 stability. 2025's lighter reinvestment (Rp 52 M) is the baseline for deciding whether 2026 returns to 2024 levels or holds.</p>
         </div>
       </div>
       <div class="panel">
@@ -332,6 +380,7 @@
         <div style="font-size:14.5px;line-height:1.65">
           <p><strong>Cafe is a traffic strategy, not a revenue strategy.</strong> Four-fold growth in 2025 at near-zero margin is a feature, not a bug, if we believe the cafe pulls guests and visibility. The question isn't <em>how do we make cafe profitable</em> — it's <em>are we measuring the right thing</em>.</p>
           <p><strong>The balance line lies.</strong> Reported cash balance mixes operations with distributions and reinvestment. The partner decision about distribution cadence matters more for clarity than for cash management.</p>
+          <p><strong>Currency is a silent third partner.</strong> The rupiah has lost ground every year of the building's life. Growth that looks like growth in IDR is materially flatter in EUR — switch the currency toggle and read §00b before quoting a growth rate to anyone paid in euros.</p>
         </div>
       </div>
     </div>
@@ -339,84 +388,223 @@
 
   <footer class="foot">
     <div>KASIA UNGASAN · HISTORICAL RECORD · 2023–2026</div>
-    <div>Sources: KASIA bank books · <span id="gen-time">—</span></div>
+    <div>Sources: KASIA bank books · FX: ECB reference rates · <span id="gen-time">—</span></div>
   </footer>
 
 </div>
 
 <script src="assets/data.js"></script>
 <script>
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let D26 = null;
+
 (async function() {
   document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
-
-  const h23 = KASIA_HISTORY[2023];
-  const h24 = KASIA_HISTORY[2024];
-  const h25 = KASIA_HISTORY[2025];
-
-  // 2023
-  document.getElementById('y23-rev').textContent = fmtIDR(h23.total_revenue);
-  document.getElementById('y23-other').textContent = fmtIDR(h23.total_other_income);
-  document.getElementById('y23-exp').textContent = fmtIDR(h23.total_expense);
-  document.getElementById('y23-bal').textContent = fmtIDR(h23.balance);
-
-  // 2024
-  document.getElementById('y24-rev').textContent = fmtIDR(h24.hotel_revenue);
-  document.getElementById('y24-cafe').textContent = fmtIDR(h24.cafe_studio_revenue);
-  document.getElementById('y24-inv').textContent = fmtIDR(h24.investment);
-  document.getElementById('y24-balall').textContent = fmtIDR(h24.balance_all);
-  document.getElementById('y24-bal-inline').textContent = fmtIDR(h24.balance_hotel);
-
-  // 2025
-  document.getElementById('y25-rev').textContent = fmtIDR(h25.hotel_revenue);
-  document.getElementById('y25-cafe').textContent = fmtIDR(h25.cafe_studio_revenue);
-  document.getElementById('y25-payout').textContent = fmtIDR(h25.investor_payout);
-  document.getElementById('y25-bal').textContent = fmtIDR(h25.balance_hotel);
-  document.getElementById('y25-cafenet-inline').textContent = fmtIDR(h25.cafe_studio_revenue - h25.cafe_expense);
-
-  // 2026 Q1
-  const { data: d26 } = await loadYear(2026);
-  const q1 = { months: d26.months.slice(0, 3) };
-  const m26 = computeMetrics(q1);
-  document.getElementById('y26-rev').textContent = fmtIDR(m26.revenue);
-  document.getElementById('y26-op').textContent = fmtIDR(m26.op_profit);
-  document.getElementById('y26-marg').textContent = fmtPct(m26.op_margin);
-
-  // Occupancy — per year sparks + annual avg
-  renderOccupancyStrips();
-
-  // Arc chart — yearly revenue
-  renderArc({
-    2023: h23.total_revenue + h23.total_other_income,
-    2024: h24.total_revenue_all,
-    2025: h25.total_revenue_all,
-    "2026 (Q1 × 4)": m26.revenue * 4 + (m26.cafe_rev + m26.studio_rev) * 4,   // extrapolated
-  });
+  const { data } = await loadYear(2026);
+  D26 = data;
+  mountCurrencySwitch('#cur-switch', render);
+  renderOccupancyStrips();   // currency-independent
+  render();
 })();
 
-function renderArc(data) {
-  const entries = Object.entries(data);
-  const W = 1000, H = 280, PAD_L = 64, PAD_R = 20, PAD_T = 30, PAD_B = 56;
+function render() {
+  const cur = KASIA_CUR.code;
+  const h23 = KASIA_HISTORY[2023], h24 = KASIA_HISTORY[2024], h25 = KASIA_HISTORY[2025];
+  const t23 = historyTotals(2023), t24 = historyTotals(2024), t25 = historyTotals(2025);
+  const ytd = computeMetrics(D26);
+
+  document.getElementById('arc-note').textContent = cur + ' · hotel + cafe + studio';
+
+  // ---- 2023. Monthly revenue is converted month-by-month; the undated
+  // line items (other income, total expense, balance) use the year average.
+  // NOTE: the 2023 monthly array already folds other income into `revenue`
+  // (months sum exactly to total_revenue + total_other_income), so the
+  // "other income" tile below is a subset of this figure, not an addition.
+  set('y23-rev',   fmtVal(t23.revenue));
+  set('y23-other', fmtVal(fxConvAnnual(h23.total_other_income, 2023)));
+  set('y23-exp',   fmtVal(t23.expense));
+  set('y23-bal',   fmtVal(t23.balance));
+  fxNote('y23-fx', 2023, t23);
+
+  // ---- 2024
+  set('y24-rev',   fmtVal(t24.revenue));
+  set('y24-cafe',  fmtVal(fxConvAnnual(h24.cafe_studio_revenue, 2024)));
+  set('y24-inv',   fmtVal(fxConvAnnual(h24.investment, 2024)));
+  set('y24-balall',fmtVal(fxConvAnnual(h24.balance_all, 2024)));
+  set('y24-bal-inline', fmtVal(fxConvAnnual(h24.balance_hotel, 2024)));
+  fxNote('y24-fx', 2024, t24);
+
+  // ---- 2025
+  set('y25-rev',   fmtVal(t25.revenue));
+  set('y25-cafe',  fmtVal(fxConvAnnual(h25.cafe_studio_revenue, 2025)));
+  set('y25-payout',fmtVal(fxConvAnnual(h25.investor_payout, 2025)));
+  set('y25-bal',   fmtVal(fxConvAnnual(h25.balance_hotel, 2025)));
+  set('y25-cafenet-inline',
+      fmtVal(fxConvAnnual(h25.cafe_studio_revenue - h25.cafe_expense, 2025)));
+  fxNote('y25-fx', 2025, t25);
+
+  // ---- 2026 year to date
+  const lastMo = ytd.months[ytd.months.length - 1];
+  const span = MONTH_NAMES[ytd.months[0].idx] + '–' + MONTH_NAMES[lastMo.idx];
+  document.getElementById('y26-tag').textContent = span + ' · in progress';
+  document.getElementById('y26-l1').textContent = 'YTD revenue (' + span + ')';
+  set('y26-rev',  fmtVal(ytd.revenue));
+  set('y26-op',   fmtVal(ytd.op_profit));
+  set('y26-marg', fmtPct(ytd.op_margin));
+  renderY26Prose(ytd, span);
+  fxNote('y26-fx', 2026, {
+    blended: cur === 'IDR' ? 1 : fxBlended(ytd.revenueIDR, ytd.revenue),
+    annualRate: fxAnnualRate(2026)
+  }, span);
+
+  renderFxTable(t23, t24, t25, ytd);
+
+  renderArc({
+    "2023": t23.revenue,   // months already include other income — do not add it again
+    "2024": convYear(h24.total_revenue_all, 2024, t24),
+    "2025": convYear(h25.total_revenue_all, 2025, t25),
+    [`2026 ${span}`]: ytd.revenue + ytd.cafe_rev + ytd.studio_rev,
+    [`2026 annualised`]: (ytd.revenue + ytd.cafe_rev + ytd.studio_rev) * 12 / ytd.months.length,
+  }, ytd.months.length);
+}
+
+// Scale a whole-year figure using the revenue-weighted blended rate where
+// we have one — more faithful than the simple annual mean.
+function convYear(idr, year, totals) {
+  if (KASIA_CUR.isIDR()) return idr;
+  const r = totals && totals.blended ? totals.blended : fxAnnualRate(year);
+  return r ? idr / r : null;
+}
+
+function set(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+
+function fxNote(id, year, totals, spanLabel) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (KASIA_CUR.isIDR()) { el.textContent = ''; return; }
+  const code = KASIA_CUR.code;
+  el.innerHTML = `Blended ${esc(code)} rate<br/><b>${esc(fmtRate(totals.blended))}</b> / 1 ${esc(code)}` +
+    (spanLabel ? `<br/>${esc(spanLabel)} average` : `<br/>${year} revenue-weighted`);
+}
+
+function renderY26Prose(ytd, span) {
+  const q = quarterStatus(D26);
+  const done = q.filter(x => x.available && !x.partial).map(x => x.key);
+  const part = q.filter(x => x.partial).map(x => x.key);
+  const q1 = computeMetrics(sliceQuarter(D26, 'Q1'));
+  const q2 = q.find(x => x.key === 'Q2' && x.available && !x.partial)
+    ? computeMetrics(sliceQuarter(D26, 'Q2')) : null;
+
+  document.getElementById('y26-title').textContent =
+    q2 ? 'Two quarters in. Revenue held; the channel mix flipped.' : 'Year to date.';
+
+  let p1 = `${span} produced ${fmtVal(ytd.revenue)} of room revenue and ${fmtVal(ytd.op_profit)} ` +
+    `of operating profit at a ${fmtPct(ytd.op_margin)} margin. `;
+  if (q2) {
+    const dRev = (q2.revenue - q1.revenue) / q1.revenue;
+    const dOpex = (q2.opex - q1.opex) / q1.opex;
+    p1 += `Q2 revenue moved ${fmtDelta(dRev)} against Q1 while operating cost moved ${fmtDelta(dOpex)} — ` +
+      `the improvement is cost discipline rather than growth. `;
+  }
+  p1 += `${done.length ? done.join(' and ') + ' complete' : 'No complete quarter yet'}` +
+    `${part.length ? ', ' + part.join(' and ') + ' in progress' : ''}.`;
+  document.getElementById('y26-para1').textContent = p1;
+
+  let p2;
+  if (q2) {
+    const dShare = q1.channels.transfer / q1.chan_total;
+    const dShare2 = q2.channels.transfer / q2.chan_total;
+    p2 = `The structural story of 2026 so far is the channel mix. Direct booking fell from ` +
+      `${fmtPct(dShare)} of tracked room revenue in Q1 to ${fmtPct(dShare2)} in Q2, while four OTA ` +
+      `channels went live (Agoda, Asia Pay, Traveloka, EDC). Revenue barely moved, which is precisely ` +
+      `what makes the shift easy to miss on a top-line chart — the cost of it lands in commission, ` +
+      `not in the revenue line.`;
+  } else {
+    p2 = `The quarterly and monthly views carry the detail. Not enough of the year is closed to call a trend.`;
+  }
+  document.getElementById('y26-para2').textContent = p2;
+}
+
+function renderFxTable(t23, t24, t25, ytd) {
+  const h = KASIA_HISTORY;
+  const rows = [
+    { year: '2023', idr: t23.revenueIDR },
+    { year: '2024', idr: t24.revenueIDR },
+    { year: '2025', idr: t25.revenueIDR },
+    { year: '2026 YTD', idr: ytd.revenueIDR, y: 2026, months: ytd.months.map(m => m.idx) },
+  ];
+  rows[0].y = 2023; rows[0].months = h[2023].months.map(m => m.idx);
+  rows[1].y = 2024; rows[1].months = h[2024].months.map(m => m.idx);
+  rows[2].y = 2025; rows[2].months = h[2025].months.map(m => m.idx);
+  const monthsFor = r => (r.y === 2026) ? ytd.months : h[r.y].months;
+  const key = r => (r.y === 2026) ? 'hotel_revenue' : 'revenue';
+
+  const body = rows.map(r => {
+    const usd = fxSum(monthsFor(r), key(r), r.y, 'USD');
+    const eur = fxSum(monthsFor(r), key(r), r.y, 'EUR');
+    return `<tr>
+      <td><strong>${esc(r.year)}</strong></td>
+      <td class="num">${esc(fmtIDR(r.idr))}</td>
+      <td class="num">${esc(fmtFX(usd,'USD'))}</td>
+      <td class="num">${esc(fmtFX(eur,'EUR'))}</td>
+      <td class="num muted">${esc(fmtRate(r.idr/usd))}</td>
+      <td class="num muted">${esc(fmtRate(r.idr/eur))}</td>
+    </tr>`;
+  }).join('');
+  document.querySelector('#fx-tbl tbody').innerHTML = body;
+
+  // The comparison worth stating out loud: growth in IDR vs growth in EUR.
+  const idrG = (t25.revenueIDR / t23.revenueIDR - 1);
+  const usd23 = fxSum(h[2023].months, 'revenue', 2023, 'USD');
+  const usd25 = fxSum(h[2025].months, 'revenue', 2025, 'USD');
+  const eur23 = fxSum(h[2023].months, 'revenue', 2023, 'EUR');
+  const eur25 = fxSum(h[2025].months, 'revenue', 2025, 'EUR');
+  const usdG = (usd25 / usd23 - 1), eurG = (eur25 / eur23 - 1);
+
+  document.getElementById('fx-lede').innerHTML =
+    `Room revenue grew <b>${esc(fmtDelta(idrG))}</b> from 2023 to 2025 in rupiah. The same growth is ` +
+    `<b>${esc(fmtDelta(usdG))}</b> in dollars and <b>${esc(fmtDelta(eurG))}</b> in euros. Nothing about the ` +
+    `building changed between those three numbers — only the currency you happen to be paid in. ` +
+    `The rupiah went from about ${esc(fmtRate(fxAnnualRate(2023,'EUR')))} to ` +
+    `${esc(fmtRate(fxAnnualRate(2025,'EUR')))} per euro across that period.`;
+
+  document.getElementById('fx-tbl-note').innerHTML =
+    `<b>Method.</b> Each month's rupiah revenue is converted at that month's average IDR rate ` +
+    `(ECB reference rates) and the months are then summed. The blended columns are the rate this ` +
+    `actually implies — total IDR divided by total converted — not a simple average of the monthly rates. ` +
+    `<b>Note on the source sheet:</b> the 2026 tab carries its own USD column computed at a flat ` +
+    `Rp ${esc(new Intl.NumberFormat('en-US').format(KASIA_FX.sheetFlatRate2026))} for every month. ` +
+    `Because the rupiah weakened through 2026, that flat rate overstates USD revenue by roughly ` +
+    `${esc(fmtPct(Math.abs(fxRate(2026, 6, 'USD')/KASIA_FX.sheetFlatRate2026 - 1)))} by July. ` +
+    `The figures on this dashboard do not use it.<span class="flag">sheet fix needed</span>`;
+}
+
+function renderArc(data, monthsInYtd) {
+  const entries = Object.entries(data).filter(e => e[1] != null);
+  const W = 1000, H = 300, PAD_L = 74, PAD_R = 20, PAD_T = 30, PAD_B = 62;
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
-  const maxV = Math.max(...entries.map(e => e[1])) * 1.12;
+  const maxV = Math.max(...entries.map(e => e[1])) * 1.14;
   const yScale = v => PAD_T + plotH - (v/maxV) * plotH;
   const groupW = plotW / entries.length;
-  const barW = Math.min(100, groupW * 0.5);
+  const barW = Math.min(96, groupW * 0.5);
 
   const ticks = [0, 0.25, 0.5, 0.75, 1].map(t => t * maxV);
   const grid = ticks.map(v => `<line class="grid" x1="${PAD_L}" x2="${W-PAD_R}" y1="${yScale(v)}" y2="${yScale(v)}"/>
-    <text x="${PAD_L - 10}" y="${yScale(v)+3}" text-anchor="end">${esc(fmtIDR(v))}</text>`).join('');
+    <text x="${PAD_L - 10}" y="${yScale(v)+3}" text-anchor="end">${esc(fmtValAxis(v))}</text>`).join('');
 
   const bars = entries.map(([label, v], i) => {
     const cx = PAD_L + groupW * i + groupW / 2;
     const y = yScale(v);
-    const isProj = label.includes('Q1');
+    const isProj = /annualis/i.test(label);
+    const isYtd  = /YTD|–/.test(label) && !isProj;
     const fill = isProj ? 'url(#hatch-arc)' : 'var(--jungle)';
     return `
       <g>
         <rect fill="${fill}" ${isProj ? 'stroke="var(--ink)" stroke-width="0.6"' : ''} x="${cx - barW/2}" y="${y}" width="${barW}" height="${plotH + PAD_T - y}"/>
         <text x="${cx}" y="${H - PAD_B + 20}" text-anchor="middle" fill="var(--ink)" font-weight="500" font-size="11">${esc(label)}</text>
-        <text x="${cx}" y="${y - 8}" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="600">${esc(fmtIDR(v))}</text>
+        ${isYtd ? `<text x="${cx}" y="${H - PAD_B + 34}" text-anchor="middle" font-size="9">${monthsInYtd} months</text>` : ''}
+        <text x="${cx}" y="${y - 8}" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="600">${esc(fmtValAxis(v))}</text>
       </g>`;
   }).join('');
 
@@ -432,11 +620,11 @@ function renderArc(data) {
       <line class="axis" x1="${PAD_L}" x2="${W-PAD_R}" y1="${PAD_T + plotH}" y2="${PAD_T + plotH}"/>
       <line class="axis" x1="${PAD_L}" x2="${PAD_L}" y1="${PAD_T}" y2="${PAD_T + plotH}"/>
       ${bars}
-      <g transform="translate(${W - PAD_R - 200}, ${H - 10})">
+      <g transform="translate(${W - PAD_R - 240}, ${H - 10})">
         <rect fill="var(--jungle)" x="0" y="-10" width="12" height="10"/>
         <text x="18" y="-1">Actual</text>
-        <rect fill="url(#hatch-arc)" stroke="var(--ink)" stroke-width="0.5" x="70" y="-10" width="12" height="10"/>
-        <text x="88" y="-1">Projected from Q1</text>
+        <rect fill="url(#hatch-arc)" stroke="var(--ink)" stroke-width="0.5" x="90" y="-10" width="12" height="10"/>
+        <text x="108" y="-1">Annualised from YTD</text>
       </g>
     </svg>`;
 }
@@ -450,7 +638,6 @@ function renderOccupancyStrips() {
     if (sparkEl) {
       sparkEl.innerHTML = arr.map((v, i) => {
         if (v == null) return '<span class="empty" style="height:3px"></span>';
-        // Flag the Dec 2025 transition reading visually
         const isTransition = (year === 2025 && i === 11);
         const cls = isTransition ? 'transition' : '';
         const h = Math.max(3, Math.round(v * 22));
@@ -466,7 +653,6 @@ function renderOccupancyStrips() {
       avgEl.textContent = fmtPct(avg) + (year === 2025 ? ' (Jan–Nov)' : '');
     }
   });
-  // 2026 — aggregate strip + mini stat
   const ns = occ.newSystem;
   if (ns) {
     const miniEl = document.getElementById('y26-occ');
@@ -482,7 +668,11 @@ function renderOccupancyStrips() {
     if (leadEl) leadEl.textContent = ns.avgLeadTimeDays + ' days';
   }
 }
-const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 </script>
+
+<!-- Optional password gate. Present only where a backend serves assets/auth.js;
+     on a static host the file 404s and the dashboard renders open. -->
+<script src="assets/auth.js"></script>
+
 </body>
 </html>

@@ -1,18 +1,18 @@
 # KASIA Ungasan — Partner Dashboard
 
-Static HTML dashboard in three views. Reads live from a Google Sheet; falls back
-to an embedded snapshot if offline or if the sheet is unreachable.
+Static HTML dashboard in three views, in Rupiah, US Dollars or Euros. Reads live
+from a Google Sheet where it can; otherwise renders an embedded snapshot.
 
 ## Structure
 
 ```
 KASIA-dashboard/
-├── index.html          ← A · Quarterly report (primary partner view)
+├── index.html          ← A · Quarterly report (Q1 / Q2 / Q3 / Q4 switcher)
 ├── monthly.html        ← B · Monthly snapshot (one month at a time)
-├── historical.html     ← C · History 2023–2026 (four-year arc)
+├── historical.html     ← C · History 2023–2026 (four-year arc + currency)
 ├── assets/
 │   ├── style.css       ← shared styling (concrete + jungle green)
-│   └── data.js         ← shared data layer, CSV parser, metrics
+│   └── data.js         ← data layer, FX rates, CSV parser, metrics
 ├── HOTEL_KPI_TEMPLATE.csv  ← template to start tracking occupancy / ADR / RevPAR
 └── README.md
 ```
@@ -22,12 +22,12 @@ everywhere.
 
 ## Opening it now
 
-Double-click `index.html`. Works offline — a Q1 2026 snapshot is embedded. The
-header shows `Live · Google Sheets` (green dot) or `Static · embedded` so you
-always know which source you're reading.
+Double-click `index.html`. Works offline — a Jan–Jul 2026 snapshot is embedded.
+The header shows `Live · Google Sheets` (green dot) or `Static · embedded` so you
+always know which source you are reading.
 
-For best results, open with a local server so the browser allows cross-origin
-fetches against Google's gviz endpoint:
+For a live read, serve it locally so the browser will allow the cross-origin
+fetch against Google's gviz endpoint:
 
 ```bash
 cd KASIA-dashboard
@@ -35,117 +35,113 @@ python3 -m http.server 8080
 # then open http://localhost:8080
 ```
 
-## Wiring to the live Google Sheet
+**On GitHub Pages this always reads the embedded snapshot.** Google's gviz
+endpoint does not send CORS headers to an arbitrary origin, so the live fetch
+fails and `loadYear()` falls through to the snapshot in `assets/data.js`. That is
+by design, not a bug — but it means the snapshot has to be refreshed whenever new
+months land in the sheet, otherwise the published dashboard silently shows stale
+figures. See "Refreshing the snapshot" below.
 
-Already configured. The sheet ID `1eisZIIB3j8wRNYqLhTDjQSwMXUWgTPZR` and the
-`TOTAL 2026` tab gid `351591053` live in `assets/data.js` under `KASIA_CONFIG`.
+## Currency
 
-**No "Publish to web" required.** The dashboard uses Google's `gviz` CSV
-endpoint, which respects normal sheet sharing permissions. As long as the sheet
-is set to "Anyone with the link can view" (or the viewer is signed in with
-access), the fetch works.
+The IDR / USD / EUR switch in the masthead persists across all three views.
 
-To point it at a different sheet or tab, edit `assets/data.js`:
+Rates are **monthly averages of ECB daily reference rates**, embedded in
+`KASIA_FX` in `assets/data.js`, covering 2023-01 through 2026-08. Revenue and
+cost are flows earned across a month rather than balances held at a point in
+time, so each month's rupiah is converted at that month's average rate.
 
-```js
-window.KASIA_CONFIG = {
-  sheetId: "YOUR_SHEET_ID",
-  tabs: {
-    2026: "YOUR_TAB_GID",
-    ...
-  },
-  ...
-};
+Quarterly and annual figures are **never** converted at a single blended rate.
+Each month is converted at its own rate and the months are then summed —
+`fxSum()` is the only aggregation path. The "blended rate" shown in the UI is
+derived afterwards (total IDR ÷ total converted) and is a readout, not an input.
+Converting a period total at one average rate would hide the rupiah's drift
+inside the period, which through 2026 has been material: the rate moved from
+Rp 16,832 to Rp 18,011 per dollar between January and July.
+
+To extend the rate table:
+
+```bash
+curl -s "https://api.frankfurter.dev/v1/2026-01-01..YYYY-MM-DD?base=EUR&symbols=IDR,USD"
 ```
 
-**Security note.** `gviz` exposes whatever the sheet exposes. Keep personal bank
-numbers, IDs, and employee data off the partner-facing tab. Mirror an aggregated
-P&L view into a dedicated tab and point the dashboard at that.
+Average the daily values per calendar month. For the USD table compute
+`IDR ÷ USD` per day *before* averaging — the ratio of the two monthly means is
+not the same number. Leave future months as `null`; `fxRate()` carries the last
+known rate forward and the monthly view labels it when it does.
 
-## The three views
+## Refreshing the snapshot
 
-### A — Quarterly (`index.html`)
-The partner report. Hero operating profit, KPI grid, monthly bars, channel mix,
-cost ranked table, cafe line, decisions panel. This is what you send in the
-quarterly email.
+`KASIA_2026_EMBEDDED` in `assets/data.js` is what the published site renders.
+When new months appear in the sheet, re-export the TOTAL 2026 tab and update it:
 
-### B — Monthly (`monthly.html`)
-A simpler one-month-at-a-time snapshot with a month picker. Use this to answer
-"how did last month go?" without re-reading the full quarterly narrative. Shows
-revenue → opex → payout → cash delta as a visual flow. Defaults to the most
-recent month with data.
+```bash
+curl -sL "https://docs.google.com/spreadsheets/d/1eisZIIB3j8wRNYqLhTDjQSwMXUWgTPZR/gviz/tq?tqx=out:csv&gid=351591053" -o sheet.csv
+```
 
-### C — History (`historical.html`)
-The four-year arc — 2023 construction, 2024 first full year, 2025 first
-profitable hotel line, 2026 in progress. Tells the structural story so partners
-(and you) can see whether this year's numbers are continuity or drift. Embedded
-snapshots from the 2023/2024/2025 bank books drive this page.
+Column meanings are pinned in `KASIA_SHEET_MAP`. Do not reintroduce substring
+matching — see below.
 
-## The KPI gap (still pending)
+## Two known defects in the source sheet
 
-The bank book knows *money*. It does not know *rooms*. Occupancy, ADR, and
-RevPAR are flagged as "coming soon" in the KPI grid until the booking-system
-export (PMS) is wired. Two options for closing this:
+The dashboard works around both. Delete the workarounds once the sheet is fixed.
 
-1. **Five-minutes-per-month manual entry.** Upload `HOTEL_KPI_TEMPLATE.csv` as a
-   new `Hotel KPI` tab in the same Google Sheet. Fill in Rooms Available,
-   Nights Sold, Room Revenue each month-close. Formulas derive occupancy, ADR,
-   RevPAR.
-2. **Direct PMS export.** If the booking system supports scheduled CSV export,
-   point that at the same sheet (append-only). Near-zero maintenance once set
-   up.
+**1. "Income Cash" and "Income Transfer" are transposed.** The large declining
+column sitting under *Income Cash* (Rp 109.8 M in January falling to Rp 41.3 M in
+July) is direct / bank-transfer revenue. The small column under *Income Transfer*,
+which first appears in April, is cash on arrival. `KASIA_SHEET_MAP` maps them to
+their true meaning and both are commented.
 
-Until then, the current dashboard is a cash-flow dashboard, not a hotel
-performance dashboard. Useful for partner confidence, insufficient for
-occupancy/pricing decisions.
+**2. The sheet's own USD column uses a flat Rp 16,450 for every month.** Real
+monthly averages ran 16,832 in January to 18,011 in July, so the flat rate
+overstates dollar revenue by about 5% across Jan–Jul and 9.5% for July alone.
+The dashboard ignores that column and computes its own.
 
-## Method notes
+## Why columns are pinned by exact header
 
-- **Operating profit** = `hotel_revenue − (hotel_expense_total − investor_payout − investment)`.
-  This is the number that tells you whether the building paid for itself before
-  partner distributions.
-- **Cash delta** = `hotel_revenue − hotel_expense_total`. This is what actually
-  hits the balance — lower than operating profit in months with distributions.
-- **Channel mix** is by revenue (not bookings). A premium direct booking weighs
-  more than five cheap Agoda stays. True channel health needs nights-sold data.
-- **Cafe & studio** — cafe is priced for neighborhood, not margin. Studio is
-  reported for completeness, footnoted, not treated as strategic.
-- **Historical figures** (2023–2025) are embedded from the uploaded bank books
-  rather than fetched live. They don't change; no reason to re-fetch.
+A previous version resolved columns with substring matching
+(`findCol('INCOME TRANSFER', 'TRANSFER')`). When the sheet gained the *Income
+Asia Pay* and *Income Traveloka* columns, that matcher started resolving
+`transfer` to a near-empty column while the real direct-booking money sat under
+*Income Cash* — so the dashboard reported direct bookings at about 3% of room
+revenue instead of the true share, in a report whose headline argument is that
+direct booking is the margin advantage. The bug was invisible for as long as the
+view was frozen to an embedded Q1 snapshot, and surfaced the moment the report
+rolled forward onto live data. It caused the 24 May 2026 revert.
 
-## Design language
+Both parsers — `parseSheet2026()` in `assets/data.js` and `parse_sheet_csv()` in
+the FastAPI variant — now resolve against an exact normalized header map and
+raise if a critical column is missing, rather than silently returning zeros.
 
-Tropical brutalist — responding to the KASIA building itself:
+## Other data caveats, unchanged
 
-- **Concrete palette** (warm gray, board-formed) for surfaces.
-- **Jungle green** as the single accent, used sparingly.
-- **IBM Plex Sans / Mono** for the technical, legible body text; **Fraunces**
-  reserved for the KASIA wordmark and large display numbers.
-- **Exposed structure** — visible rulers, corner brackets, section numbers,
-  hairlines. The interface looks like a set of working drawings, not a product
-  brochure.
+- The PMS reports only a 5-month rolling aggregate (1 Dec 2025 – 1 May 2026), so
+  occupancy is not split per quarter and ADR / RevPAR are unavailable. The same
+  occupancy figure therefore shows for every 2026 month.
+- Channel lines do not sum exactly to the hotel revenue total in every month
+  (largest gap in Q2 2026: about Rp 3.0 M). Channel shares are stated as a share
+  of *tracked* channel revenue, not of the revenue line.
+- December 2025 occupancy reads 55% because the booking system was mid-migration.
+  It is a transition artefact, not a demand collapse, and is excluded from the
+  2025 annual average.
 
-## Hosting (when you're ready to share)
+## Optional password gate
 
-All files are static. Works on:
+`assets/auth.js` is loaded by all three pages and 404s harmlessly here — which is
+why this deployment renders open. A private variant serves that file alongside a
+FastAPI app (`app.py`) that proxies the sheet and requires a Bearer token on
+`/api/data`.
 
-- **Netlify drop** — drag the folder onto `app.netlify.com/drop`. Immediate URL.
-  Password-protect on the paid plan.
-- **Vercel** — `vercel` CLI or dashboard. Custom domain trivial.
-- **GitHub Pages** — push, enable Pages.
-- **Cloudflare Pages** — same shape.
+Note what that does and does not protect. The overlay is convenience; the real
+gate is server-side. Even with it, the embedded snapshot compiled into
+`assets/data.js` is readable by anyone who can load the page. Treat the snapshot
+as public in any deployment you expose to the internet.
 
-For a partner-only link, Netlify's password protection on the $19/mo Starter
-plan is the simplest guard.
+## Editing the partner commentary
 
-## What's next
-
-- PMS / booking-system wiring (occupancy, ADR, RevPAR)
-- Year-over-year overlay on the monthly chart (once 2025 is re-parsed through
-  the same pipeline)
-- Booking-pace chart if you start logging 30/60/90-day forward bookings
-- Optional: partner-specific toggles (hide salary detail, show only top-line)
-
----
-
-*Part of the Personal project workspace.*
+Everything on the quarterly page is computed from the data — headline, ledes,
+callouts, cost commentary, channel notes — so the report writes itself as
+quarters land. The one exception is §07 *For the Partners*, which is judgement
+rather than arithmetic. It lives in a `DECISIONS` object at the top of the script
+in `index.html`, keyed by quarter. Edit the text there; the layout reads whatever
+is present.

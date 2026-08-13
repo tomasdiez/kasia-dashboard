@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>KASIA Ungasan · Monthly Report</title>
-<meta name="description" content="KASIA Ungasan — single-month snapshot. Revenue, channels, costs, balance." />
+<meta name="description" content="KASIA Ungasan — single-month snapshot. Revenue, channels, costs, balance. IDR / USD / EUR." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -38,9 +38,11 @@
     color: var(--concrete-0);
     font-weight: 600;
   }
+  /* Keep the paper background — dimming the element lets the dark container
+     show through and makes empty months look emphasised. */
   .month-picker button:disabled {
-    color: var(--ink-mute);
-    opacity: 0.4;
+    color: var(--concrete-3);
+    background: var(--paper);
     cursor: not-allowed;
   }
   .flow {
@@ -88,6 +90,18 @@
 </style>
 </head>
 <body>
+
+<!-- Login overlay -->
+<div id="login-overlay" class="hidden">
+  <div class="login-box">
+    <h2>KASIA Ungasan</h2>
+    <p>Enter the password to view the dashboard.</p>
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+    <button id="login-btn">Enter</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
 <div class="frame">
 
   <div class="ruler" data-label="B / MONTHLY · 2026"></div>
@@ -100,6 +114,7 @@
     <div class="masthead-right">
       <strong id="m-title">—</strong><br/>
       <span class="status" id="source-status">loading</span>
+      <div id="cur-switch"></div>
     </div>
   </header>
 
@@ -111,6 +126,7 @@
 
   <div class="section-no">§ select month</div>
   <div class="month-picker" id="month-picker" role="tablist" aria-label="Select month"></div>
+  <div class="fx-strip standalone" id="fx-strip" hidden></div>
 
   <!-- HERO -->
   <div class="hero-stat">
@@ -124,6 +140,7 @@
       <div>Op. cost <b id="hero-opex">—</b></div>
       <div>Margin <b id="hero-margin">—</b></div>
       <div>Occupancy <b id="hero-occ">—</b></div>
+      <div id="hero-rate-wrap" hidden>Rate <b id="hero-rate">—</b></div>
     </aside>
   </div>
 
@@ -162,9 +179,10 @@
     <div class="section-no">§02 · Channels</div>
     <h3 class="section-title">How they booked</h3>
     <div class="panel">
-      <div class="panel-label"><span>§02.1 — BOOKING CHANNELS</span><span class="note">IDR · % of room revenue</span></div>
+      <div class="panel-label"><span>§02.1 — BOOKING CHANNELS</span><span class="note" id="chan-note">IDR · % of tracked room revenue</span></div>
       <div class="bars" id="channel-bars"></div>
     </div>
+    <p class="footnote" style="margin-top:12px" id="channel-footnote">—</p>
   </section>
 
   <!-- COSTS -->
@@ -172,7 +190,7 @@
     <div class="section-no">§03 · Costs</div>
     <h3 class="section-title">Where the money went</h3>
     <div class="panel">
-      <div class="panel-label"><span>§03.1 — COST LINES</span><span class="note">ranked · operating only</span></div>
+      <div class="panel-label"><span>§03.1 — COST LINES</span><span class="note" id="costs-note">ranked · operating only</span></div>
       <table class="tbl" id="costs-tbl">
         <thead><tr><th>Line</th><th class="num">Amount</th><th class="num">% of opex</th></tr></thead>
         <tbody></tbody>
@@ -201,6 +219,7 @@
   <p class="footnote" style="margin-top:14px">
     <b>* Occupancy.</b> 5-month aggregate from the new PMS (1 Dec 2025 – 1 May 2026). Per-month split not yet reconciled, so the same figure shows for every 2026 month for now.
   </p>
+  <p class="footnote" id="fx-footnote" hidden></p>
 
   <footer class="foot">
     <div>KASIA UNGASAN · MONTHLY SNAPSHOT</div>
@@ -212,6 +231,15 @@
 <script src="assets/data.js"></script>
 <script>
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const CHANNEL_DEFS = [
+  { key: "transfer",  label: "Direct (bank transfer)", ota: false },
+  { key: "airbnb",    label: "Airbnb",                 ota: true  },
+  { key: "agoda",     label: "Agoda",                  ota: true  },
+  { key: "asiapay",   label: "Asia Pay",               ota: true  },
+  { key: "traveloka", label: "Traveloka",              ota: true  },
+  { key: "edc",       label: "EDC (card)",             ota: false },
+  { key: "cash",      label: "Cash on arrival",        ota: false },
+];
 let DATA = null, SOURCE = null, CURRENT = 0;
 
 (async function() {
@@ -225,8 +253,10 @@ let DATA = null, SOURCE = null, CURRENT = 0;
   document.getElementById('gen-time').textContent = new Date().toISOString().slice(0,10);
 
   buildPicker();
-  // Default to the previous calendar month (e.g. in April → March).
-  // Fall back to the latest month with data if the previous month isn't in the dataset yet.
+  mountCurrencySwitch('#cur-switch', () => renderMonth(CURRENT, true));
+
+  // Default to the previous calendar month (e.g. in August → July).
+  // Fall back to the latest month with data if that month isn't in the set yet.
   const prevMonthIdx = (new Date().getMonth() - 1 + 12) % 12;
   const prevPos = data.months.findIndex(m => m.idx === prevMonthIdx);
   CURRENT = prevPos >= 0 ? prevPos : data.months.length - 1;
@@ -249,25 +279,56 @@ function buildPicker() {
   });
 }
 
-function renderMonth(pos) {
+function renderMonth(pos, keepScroll) {
   const mo = DATA.months[pos];
-  // highlight
+  const cv = v => fxConv(v || 0, 2026, mo.idx);
+  const rate = fxRate(2026, mo.idx);
+
   document.querySelectorAll('#month-picker button').forEach(b => {
     b.classList.toggle('active', +b.dataset.idx === mo.idx);
   });
 
-  const rev = mo.hotel_revenue;
-  const opex = mo.hotel_expense_total - (mo.investor_payout||0) - (mo.investment||0);
+  const rev = cv(mo.hotel_revenue);
+  const opex = cv(mo.hotel_expense_total - (mo.investor_payout||0) - (mo.investment||0));
   const opResult = rev - opex;
   const opMargin = opResult / (rev || 1);
-  const cashDelta = rev - mo.hotel_expense_total;
+  const cashDelta = cv(mo.hotel_revenue - mo.hotel_expense_total);
+  const payout = cv(mo.investor_payout || 0);
 
   document.getElementById('m-title').textContent = MONTHS[mo.idx] + ' 2026';
   document.getElementById('hero-month').textContent = MONTHS[mo.idx] + ' 2026';
-  document.getElementById('hero-net').textContent = fmtIDR(opResult);
-  document.getElementById('hero-rev').textContent = fmtIDR(rev);
-  document.getElementById('hero-opex').textContent = fmtIDR(opex);
+  document.getElementById('hero-net').textContent = fmtVal(opResult);
+  document.getElementById('hero-rev').textContent = fmtVal(rev);
+  document.getElementById('hero-opex').textContent = fmtVal(opex);
   document.getElementById('hero-margin').textContent = fmtPct(opMargin);
+  document.getElementById('chan-note').textContent = KASIA_CUR.code + ' · % of tracked room revenue';
+  document.getElementById('costs-note').textContent = KASIA_CUR.code + ' · ranked · operating only';
+
+  // FX strip and rate
+  const strip = document.getElementById('fx-strip');
+  const rateWrap = document.getElementById('hero-rate-wrap');
+  const fnote = document.getElementById('fx-footnote');
+  if (KASIA_CUR.isIDR()) {
+    strip.hidden = true; rateWrap.hidden = true; fnote.hidden = true;
+  } else {
+    const code = KASIA_CUR.code;
+    strip.hidden = false; rateWrap.hidden = false; fnote.hidden = false;
+    document.getElementById('hero-rate').textContent = fmtRate(rate);
+    // Year-to-date context: how this month's rate compares to January.
+    const jan = fxRate(2026, 0, code);
+    const drift = jan ? (rate/jan - 1) : 0;
+    const partial = KASIA_FX.partial && KASIA_FX.partial[2026] != null && mo.idx > KASIA_FX.partial[2026];
+    strip.innerHTML =
+      `<span class="key">${esc(MONTHS[mo.idx])} average rate</span>` +
+      `<span class="val">${esc(fmtRate(rate))} / 1 ${esc(code)}</span>` +
+      `<span class="sep">·</span>` +
+      `<span class="key">vs January</span>` +
+      `<span class="drift ${drift > 0 ? 'neg' : 'pos'}">${esc(fmtDelta(drift))}</span>` +
+      `<span class="sep">·</span>` +
+      `<span class="plain">${esc(fmtIDRfull(mo.hotel_revenue))} room revenue</span>` +
+      `<span class="trail">${partial ? 'rate carried forward — month not yet published' : 'ECB monthly average'}</span>`;
+    fnote.innerHTML = fxFootnote(2026, [mo.idx]);
+  }
 
   // Occupancy — 2026 has no per-month PMS data yet, only a 5-month aggregate.
   const occAgg = window.KASIA_OCCUPANCY && window.KASIA_OCCUPANCY.newSystem;
@@ -280,77 +341,84 @@ function renderMonth(pos) {
   // Flow lede
   let lede;
   if (mo.investor_payout > 0) {
-    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtIDR(opResult))} in operating profit on ${esc(fmtIDR(rev))} of room revenue. Investor distributions of ${esc(fmtIDR(mo.investor_payout))} were paid out, producing a reported cash delta of ${esc(fmtIDR(cashDelta))}.`;
+    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtVal(opResult))} in operating profit on ${esc(fmtVal(rev))} of room revenue. Investor distributions of ${esc(fmtVal(payout))} were paid out, producing a reported cash delta of ${esc(fmtVal(cashDelta))}.`;
   } else {
-    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtIDR(opResult))} on ${esc(fmtIDR(rev))} of room revenue. No investor distribution this month — the full operating result flows to balance.`;
+    lede = `${MONTHS[mo.idx]} cleared ${esc(fmtVal(opResult))} on ${esc(fmtVal(rev))} of room revenue. No investor distribution this month — the full operating result flows to balance.`;
+  }
+  if (!KASIA_CUR.isIDR()) {
+    lede += ` Converted at ${esc(fmtRate(rate))} per 1 ${esc(KASIA_CUR.code)}, this month's average.`;
   }
   document.getElementById('flow-lede').innerHTML = lede;
 
-  document.getElementById('flow-rev').textContent  = fmtIDR(rev);
-  document.getElementById('flow-opex').textContent = fmtIDR(opex);
-  document.getElementById('flow-payout').textContent = fmtIDR(mo.investor_payout || 0);
-  document.getElementById('flow-result').textContent = fmtIDR(cashDelta);
+  document.getElementById('flow-rev').textContent  = fmtVal(rev);
+  document.getElementById('flow-opex').textContent = fmtVal(opex);
+  document.getElementById('flow-payout').textContent = fmtVal(payout);
+  document.getElementById('flow-result').textContent = fmtVal(cashDelta);
   const resultBox = document.getElementById('flow-result-box');
   resultBox.classList.remove('pos','neg');
   resultBox.classList.add(cashDelta >= 0 ? 'pos' : 'neg');
 
   // Channels
-  const ch = [
-    ["Direct (transfer)", mo.transfer||0],
-    ["Airbnb", mo.airbnb||0],
-    ["Agoda", mo.agoda||0],
-    ["EDC (card)", mo.edc||0],
-    ["Cash", mo.cash||0],
-  ];
-  const chTotal = ch.reduce((a,[,v]) => a+v, 0) || 1;
-  const chMax = Math.max(...ch.map(e => e[1]), 1);
-  document.getElementById('channel-bars').innerHTML = ch.map(([label, v]) => `
+  const ch = CHANNEL_DEFS.map(d => ({ ...d, v: cv(mo[d.key]) })).filter(c => c.v > 0);
+  const chTotal = ch.reduce((a,c) => a + c.v, 0) || 1;
+  const chMax = Math.max(...ch.map(c => c.v), 1);
+  document.getElementById('channel-bars').innerHTML = ch.length ? ch.map(c => `
     <div class="bar-row">
-      <div class="label">${esc(label)}</div>
-      <div class="track"><div class="fill" style="width:${(v/chMax*100).toFixed(1)}%"></div></div>
-      <div class="val">${esc(fmtIDR(v))} · ${esc(fmtPct(v/chTotal))}</div>
-    </div>`).join('');
+      <div class="label">${esc(c.label)}</div>
+      <div class="track"><div class="${c.ota ? 'fill alt' : 'fill'}" style="width:${(c.v/chMax*100).toFixed(1)}%"></div></div>
+      <div class="val">${esc(fmtVal(c.v))} · ${esc(fmtPct(c.v/chTotal))}</div>
+    </div>`).join('') : '<p class="muted">No channel breakdown recorded for this month.</p>';
+
+  const gap = cv(mo.hotel_revenue) - chTotal;
+  document.getElementById('channel-footnote').innerHTML =
+    `<strong>Data quality.</strong> ${esc(window.KASIA_SHEET_SWAP_NOTE)}<span class="flag">sheet fix needed</span> ` +
+    (Math.abs(gap) > cv(mo.hotel_revenue) * 0.005
+      ? `Channel lines are ${esc(fmtVal(Math.abs(gap)))} ${gap > 0 ? 'short of' : 'above'} the month's room revenue total, so shares are of tracked channel revenue.`
+      : `Channel lines reconcile to the room revenue total for this month.`);
 
   // Costs table (single month)
   const costLines = [
-    ["Salary & Wages", mo.salary||0],
-    ["Utilities", mo.utilities||0],
-    ["Laundry", mo.laundry||0],
-    ["Maintenance", mo.maintenance||0],
-    ["Marketing & Sales", mo.marketing||0],
-    ["Supplies", mo.supplies||0],
-    ["Local & Community", mo.local||0],
-    ["Legal & Permits", mo.legal||0],
-    ["Assets", mo.assets||0],
-    ["Bank Credit", mo.bank_credit||0],
-    ["Taxes", mo.taxes||0],
+    ["Salary & Wages", cv(mo.salary)],
+    ["Utilities", cv(mo.utilities)],
+    ["Laundry", cv(mo.laundry)],
+    ["Maintenance", cv(mo.maintenance)],
+    ["Marketing & Sales", cv(mo.marketing)],
+    ["Supplies", cv(mo.supplies)],
+    ["Local & Community", cv(mo.local)],
+    ["Legal & Permits", cv(mo.legal)],
+    ["Assets", cv(mo.assets)],
+    ["Bank Credit", cv(mo.bank_credit)],
+    ["Taxes", cv(mo.taxes)],
   ].filter(e => e[1] > 0).sort((a,b) => b[1]-a[1]);
   const costTotal = costLines.reduce((a,[,v]) => a+v, 0) || 1;
   document.querySelector('#costs-tbl tbody').innerHTML = costLines.map(([n,v]) => `
-    <tr><td><strong>${esc(n)}</strong></td><td class="num">${esc(fmtIDR(v))}</td><td class="num muted">${esc(fmtPct(v/costTotal))}</td></tr>
+    <tr><td><strong>${esc(n)}</strong></td><td class="num">${esc(fmtVal(v))}</td><td class="num muted">${esc(fmtPct(v/costTotal))}</td></tr>
   `).join('');
   document.querySelector('#costs-tbl tfoot').innerHTML = `
-    <tr class="total"><td>Total</td><td class="num">${esc(fmtIDR(costTotal))}</td><td class="num">100%</td></tr>`;
+    <tr class="total"><td>Total</td><td class="num">${esc(fmtVal(costTotal))}</td><td class="num">100%</td></tr>`;
 
   // Cafe
-  const cafeRev = mo.cafe_revenue||0, cafeCost = mo.cafe_expense||0;
+  const cafeRev = cv(mo.cafe_revenue), cafeCost = cv(mo.cafe_expense);
   const cafeNet = cafeRev - cafeCost;
-  document.getElementById('cafe-rev').textContent = fmtIDR(cafeRev);
-  document.getElementById('cafe-cost').textContent = fmtIDR(cafeCost);
-  document.getElementById('cafe-net').textContent = fmtIDR(cafeNet);
+  document.getElementById('cafe-rev').textContent = fmtVal(cafeRev);
+  document.getElementById('cafe-cost').textContent = fmtVal(cafeCost);
+  document.getElementById('cafe-net').textContent = fmtVal(cafeNet);
   const cmEl = document.getElementById('cafe-margin');
   const cm = cafeNet / (cafeRev || 1);
   cmEl.textContent = fmtPct(cm) + ' margin';
-  cmEl.classList.remove('pos','neg');
-  cmEl.classList.add(cm >= 0 ? 'pos' : 'neg');
-  document.getElementById('studio-inline').textContent = fmtIDR(mo.studio_revenue||0);
+  cmEl.className = 'kpi-sub ' + (cm >= 0 ? 'pos' : 'neg');
+  document.getElementById('studio-inline').textContent = fmtVal(cv(mo.studio_revenue));
 
-  // Scroll into view on picker click (not on initial render)
-  if (window.__kasia_init_done) {
+  if (window.__kasia_init_done && !keepScroll) {
     document.querySelector('.hero-stat').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   window.__kasia_init_done = true;
 }
 </script>
+
+<!-- Optional password gate. Present only where a backend serves assets/auth.js;
+     on a static host the file 404s and the dashboard renders open. -->
+<script src="assets/auth.js"></script>
+
 </body>
 </html>
